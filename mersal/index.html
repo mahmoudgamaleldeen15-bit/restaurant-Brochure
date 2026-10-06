@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f7a55">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="مرسال">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>مرسال واتساب</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: عمودين على الشاشة الواسعة (الإدخال + شكل الرسالة عند العميل)، وعمود واحد على الموبايل */
+:root{
+  --bg:#eef1ee; --surface:#fbfcfb; --ink:#17211c; --muted:#5c6a63; --line:#d3dad5;
+  --accent:#0f7a55; --accent-ink:#ffffff; --bubble:#dcf3e3; --warn:#a35a00; --link:#0b5cad;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101613; --surface:#18201c; --ink:#e6ece8; --muted:#94a39b; --line:#2b3630;
+    --accent:#35b583; --accent-ink:#06261a; --bubble:#1d3a2c; --warn:#e5a550; --link:#7db8f5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101613; --surface:#18201c; --ink:#e6ece8; --muted:#94a39b; --line:#2b3630;
+  --accent:#35b583; --accent-ink:#06261a; --bubble:#1d3a2c; --warn:#e5a550; --link:#7db8f5;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
+.wrap{max-width:980px;margin-inline:auto;padding-inline:16px;padding-block:28px 40px;display:flex;flex-direction:column;gap:22px}
+header h1{margin:0;font-size:1.6rem;font-weight:700;line-height:1.3;text-wrap:balance}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.install{font:inherit;font-weight:700;font-size:.95rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+header p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px;align-items:start}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+label,.lbl{font-weight:600;font-size:.95rem}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row select{flex:0 1 150px;min-width:0}
+.row input{flex:1 1 170px;min-width:0}
+input,select,textarea{
+  font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);
+  border-radius:10px;padding:11px 12px;width:100%;
+}
+#phone{font-family:var(--f-mono);font-size:1.05rem;letter-spacing:.02em;direction:ltr;text-align:left}
+textarea{min-height:190px;resize:vertical;line-height:1.8}
+input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:.88rem;color:var(--muted);min-height:1.5em}
+.hint.warn{color:var(--warn);font-weight:500}
+.hint b{font-family:var(--f-mono);font-weight:500;color:var(--ink);direction:ltr;unicode-bidi:isolate;font-size:1rem}
+.group{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px 16px;margin:0;min-width:0;display:flex;flex-direction:column;gap:12px}
+.group legend{font-weight:600;font-size:.95rem;padding-inline:6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
+.duo label{font-weight:500;font-size:.85rem;color:var(--muted)}
+.ltr{font-family:var(--f-mono);direction:ltr;text-align:left}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;font-size:.88rem;color:var(--muted);cursor:pointer}
+.check input{width:18px;height:18px;padding:0;accent-color:var(--accent);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.82rem;font-weight:600;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.send{
+  flex:1 1 200px;display:inline-flex;justify-content:center;align-items:center;gap:8px;
+  background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.05rem;
+  text-decoration:none;border-radius:12px;padding:13px 18px;border:0;
+}
+.send[aria-disabled="true"]{background:var(--line);color:var(--muted);cursor:not-allowed}
+.ghost{font:inherit;font-weight:600;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;cursor:pointer}
+.ghost:hover{border-color:var(--muted)}
+.chat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.bubble{
+  background:var(--bubble);border-radius:14px 14px 14px 4px;padding:10px 14px;align-self:flex-start;
+  max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.98rem;min-height:2.6em
+}
+.bubble a{color:var(--link);text-decoration:underline;direction:ltr;unicode-bidi:isolate}
+.bubble .empty{color:var(--muted)}
+.linkbox{display:flex;flex-direction:column;gap:6px;min-width:0}
+.linkbox code{
+  font-family:var(--f-mono);font-size:.8rem;direction:ltr;text-align:left;display:block;
+  background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;
+  overflow-wrap:anywhere;user-select:all;max-height:7.5em;overflow:auto;color:var(--muted)
+}
+</style>
+
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <div class="top"><h1>مرسال واتساب</h1><button class="install" id="install" type="button" hidden>⬇ ثبّت الأداة</button></div>
+    <div class="hint warn" id="iosHint" hidden>على الآيفون: افتح الصفحة في Safari، دوس زرار المشاركة، واختار «إضافة إلى الشاشة الرئيسية».</div>
+    <p>اكتب رقم العميل والرسالة، والأداة تظبط الكود الدولي والروابط وتفتح واتساب على الرسالة جاهزة.</p>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <div class="field">
+        <label for="phone">رقم واتساب العميل</label>
+        <div class="row">
+          <select id="country" aria-label="الدولة"></select>
+          <input id="phone" type="tel" inputmode="tel" autocomplete="off" placeholder="01012345678">
+        </div>
+        <div class="hint" id="phoneHint" aria-live="polite"></div>
+      </div>
+
+      <fieldset class="group">
+        <legend>بيانات ديمو العميل</legend>
+        <div class="duo">
+          <div class="field"><label for="cRest">اسم المطعم</label><input id="cRest" type="text" dir="auto" autocomplete="off" placeholder="awaad"></div>
+          <div class="field"><label for="cDays">المدة التجريبية (ساعات)</label><input id="cDays" type="number" min="1" max="999" inputmode="numeric" placeholder="24"></div>
+          <div class="field"><label for="cUser">اسم المستخدم</label><input id="cUser" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="awaad"></div>
+          <div class="field"><label for="cPass">الباسورد</label><input id="cPass" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="awaad2026"></div>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="bro">رابط البروشور</label>
+        <input id="bro" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://...">
+        <label class="check"><input type="checkbox" id="broKeep" checked> افتكر الرابط ده للمرات الجاية</label>
+        <div class="hint" id="broHint">بيانات العميل بتتضاف على الرابط ده لوحدها، والبروشور بيعرضها له.</div>
+      </div>
+
+      <div class="field">
+        <label for="msg">الرسالة</label>
+        <div class="chips" id="chips" aria-label="حط في الرسالة">
+          <button type="button" class="chip" data-ph="{المطعم}">+ المطعم</button>
+          <button type="button" class="chip" data-ph="{المستخدم}">+ المستخدم</button>
+          <button type="button" class="chip" data-ph="{الباسورد}">+ الباسورد</button>
+          <button type="button" class="chip" data-ph="{المدة}">+ المدة</button>
+          <button type="button" class="chip" data-ph="{الرابط}">+ الرابط</button>
+          <button type="button" class="chip" id="tpl">رسالة جاهزة</button>
+        </div>
+        <textarea id="msg" dir="auto"></textarea>
+        <div class="hint" id="msgHint" aria-live="polite"></div>
+      </div>
+
+      <div class="actions">
+        <a class="send" id="send" target="_blank" rel="noopener" aria-disabled="true">افتح واتساب وابعت</a>
+        <button class="ghost" id="next" type="button">عميل جديد</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="field">
+        <span class="lbl">شكل الرسالة عند العميل</span>
+        <div class="chat"><div class="bubble" id="preview" dir="auto"></div></div>
+        <div class="hint">اللي بالأزرق هيوصل للعميل رابط يتداس عليه.</div>
+      </div>
+      <div class="linkbox">
+        <span class="lbl">رابط الإرسال</span>
+        <code id="waLink">—</code>
+        <div class="actions"><button class="ghost" id="copy" type="button">انسخ الرابط</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*PURE-START*/
+var COUNTRIES=[
+ ["مصر","20"],["السعودية","966"],["الإمارات","971"],["الكويت","965"],["قطر","974"],["البحرين","973"],
+ ["عُمان","968"],["الأردن","962"],["ليبيا","218"],["العراق","964"],["المغرب","212"],["الجزائر","213"],
+ ["تونس","216"],["السودان","249"],["لبنان","961"],["فلسطين","970"],["اليمن","967"],["سوريا","963"],
+ ["تركيا","90"],["أمريكا / كندا","1"],["بريطانيا","44"],["ألمانيا","49"],["فرنسا","33"]
+];
+function toLatinDigits(s){
+  return s.replace(/[٠-٩]/g,function(d){return String(d.charCodeAt(0)-0x0660)})
+          .replace(/[۰-۹]/g,function(d){return String(d.charCodeAt(0)-0x06F0)});
+}
+// بيرجع {digits, status:'empty'|'ok'|'warn'|'bad', note}
+function normalizePhone(raw,dial){
+  var s=toLatinDigits(String(raw||"")).trim();
+  if(!s) return {digits:"",status:"empty"};
+  var explicit=/^\s*(\+|00)/.test(s);
+  var d=s.replace(/\D/g,"");
+  if(!d) return {digits:"",status:"empty"};
+  if(explicit){
+    if(d.indexOf("00")===0 && s.charAt(0)!=="+") d=d.slice(2);
+  }else if(d.charAt(0)!=="0" && d.indexOf(dial)===0 && d.length>=dial.length+8){
+    // مكتوب بالكود الدولي من غير +
+  }else{
+    d=dial+d.replace(/^0+/,"");
+  }
+  // صفر زيادة بعد كود الدولة (مثال: +20 010...)
+  if(d.indexOf(dial+"0")===0) d=dial+d.slice(dial.length).replace(/^0+/,"");
+  if(d.length<9||d.length>15) return {digits:d,status:"bad",note:"الرقم ناقص أو زيادة. راجعه."};
+  if(d.indexOf("20")===0 && !/^201[0125]\d{8}$/.test(d))
+    return {digits:d,status:"warn",note:"موبايل مصر بيبقى 11 رقم ويبدأ بـ 010 أو 011 أو 012 أو 015. راجع الرقم."};
+  return {digits:d,status:"ok"};
+}
+var URL_RE=/((?:https?:\/\/|www\.)[^\s<>]+|(?:[a-z0-9-]+\.)+(?:com|net|org|io|co|me|app|dev|shop|store|site|online|info|xyz|page|link|web|eg|sa|ae|ly|gl|ai|tv)(?:\/[^\s<>]*)?)/gi;
+var TRAIL=/[.,،؛:!?؟)\]»"']+$/;
+// بيرجع {text, parts:[{link:bool,v}], fixed:عدد الروابط اللي اتصلحت, count}
+function fixMessage(src){
+  var parts=[],out="",last=0,fixed=0,count=0,m;
+  function push(link,v){ if(!v) return; parts.push({link:link,v:v}); out+=v; }
+  URL_RE.lastIndex=0;
+  while((m=URL_RE.exec(src))){
+    var raw=m[0],start=m.index,prev=start>0?src.charAt(start-1):"";
+    var hasScheme=/^(https?:\/\/|www\.)/i.test(raw);
+    if(!hasScheme && /[@._\/\w-]/.test(prev)) continue; // إيميل أو جزء من كلمة
+    var tail=(raw.match(TRAIL)||[""])[0];
+    var url=tail?raw.slice(0,raw.length-tail.length):raw;
+    if(!url) continue;
+    var changed=false;
+    var full=/^https?:\/\//i.test(url)?url:"https://"+url;
+    if(full!==url) changed=true;
+    var clean=stripTracking(full); if(clean!==full){ full=clean; changed=true; }
+    push(false,src.slice(last,start));
+    if(out && !/\s$/.test(out)){ push(false," "); changed=true; }
+    push(true,full);
+    var after=src.charAt(start+raw.length);
+    var rest=tail;
+    if(tail){ rest=" "+tail; changed=true; }
+    else if(after && !/\s/.test(after)){ rest=" "; changed=true; }
+    push(false,rest);
+    last=start+raw.length;
+    count++; if(changed) fixed++;
+  }
+  push(false,src.slice(last));
+  return {text:out,parts:parts,fixed:fixed,count:count};
+}
+// بيحوّل تنسيق ماركداون (بتاع ChatGPT وغيره) لتنسيق واتساب
+function cleanMarkdown(src){
+  return String(src||"")
+    .replace(/\[([^\]\n]+)\]\(\s*((?:https?:\/\/|www\.)[^\s)]+)\s*\)/gi,function(_,label,url){
+      label=label.trim();
+      return (/^(https?:\/\/|www\.)/i.test(label))?url:label+" 👇\n"+url;
+    })
+    .replace(/^#{1,6}\s+/gm,"")
+    .replace(/\*\*([^*\n]+?)\*\*/g,"*$1*")
+    .replace(/\*\*/g,"");
+}
+function stripTracking(u){
+  return u.replace(/([?&])utm_source=chatgpt\.com&?/gi,"$1").replace(/[?&]$/,"");
+}
+function daysText(n){
+  n=parseInt(n,10); if(!(n>0)) return "";
+  return n===1?"ساعة واحدة":n===2?"ساعتين":n<=10?n+" ساعات":n+" ساعة";
+}
+// رابط البروشور + بيانات العميل (r المطعم، u المستخدم، p الباسورد، h الساعات)
+function buildClientLink(base,c){
+  base=String(base||"").trim(); if(!base) return "";
+  if(!/^https?:\/\//i.test(base)) base="https://"+base;
+  base=stripTracking(base);
+  var qs=[];
+  [["r",c.rest],["u",c.user],["p",c.pass],["h",parseInt(c.days,10)>0?String(parseInt(c.days,10)):""]].forEach(function(k){
+    var v=String(k[1]||"").trim(); if(v) qs.push(k[0]+"="+encodeURIComponent(v));
+  });
+  if(!qs.length) return base;
+  var link=base+(base.indexOf("?")>=0?"&":"?")+qs.join("&");
+  return link.replace(/[.!*'):]$/,function(ch){return "%"+ch.charCodeAt(0).toString(16).toUpperCase()});
+}
+var DEFAULT_MSG="السلام عليكم 👋\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\n\nجهّزت لـ *{المطعم}* نسخة تجريبية من نظام إدارة مطاعم متكامل: منيو، طلبات، كاشير، واتساب، ولاء وهدايا، وكله بهوية مطعمك.\n\nشوف البرنامج وجرّبه بنفسك لمدة {المدة} 👇\n{الرابط}\n\n📱 للتواصل المباشر: 01508613866";
+// بيبدّل {المطعم} {المستخدم} {الباسورد} {المدة} {الرابط}؛ ولو {الرابط} مش مكتوب بيتحط في آخر الرسالة
+function fillTemplate(text,c,link){
+  var map={"المطعم":String(c.rest||"").trim(),"المستخدم":String(c.user||"").trim(),"الباسورد":String(c.pass||"").trim(),"المدة":daysText(c.days),"الرابط":link};
+  var missing=[],hasLink=text.indexOf("{الرابط}")>=0;
+  var out=text.replace(/\{(المطعم|المستخدم|الباسورد|المدة|الرابط)\}/g,function(m,k){
+    if(map[k]) return map[k];
+    if(missing.indexOf(k)<0) missing.push(k);
+    return m;
+  });
+  if(!hasLink && link) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+link;
+  return {text:out,missing:missing};
+}
+function buildLink(digits,text){
+  return "https://wa.me/"+digits+(text?"?text="+encodeURIComponent(text):"");
+}
+/*PURE-END*/
+
+(function(){
+  document.documentElement.lang="ar"; document.documentElement.dir="rtl";
+  var $=function(id){return document.getElementById(id)};
+  var country=$("country"),phone=$("phone"),msg=$("msg"),send=$("send"),
+      phoneHint=$("phoneHint"),msgHint=$("msgHint"),preview=$("preview"),waLink=$("waLink");
+  COUNTRIES.forEach(function(c){
+    var o=document.createElement("option"); o.value=c[1]; o.textContent=c[0]+" +"+c[1]; country.appendChild(o);
+  });
+  function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var sc=load("wa_country"); if(sc) country.value=sc;
+  var sm=load("wa_msg"); msg.value=sm||DEFAULT_MSG;
+  var cRest=$("cRest"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),bro=$("bro"),broKeep=$("broKeep");
+  var DEFAULT_BRO="https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/";
+  broKeep.checked=load("wa_bro_keep")!=="0";
+  bro.value=(broKeep.checked&&load("wa_bro"))||DEFAULT_BRO;
+  function saveBro(){
+    save("wa_bro_keep",broKeep.checked?"1":"0");
+    if(broKeep.checked) save("wa_bro",bro.value.trim()); else{try{localStorage.removeItem("wa_bro")}catch(e){}}
+  }
+
+  function pretty(d){return "+"+d}
+  function render(){
+    var p=normalizePhone(phone.value,country.value);
+    var cleaned=cleanMarkdown(msg.value);
+    var c={rest:cRest.value,user:cUser.value,pass:cPass.value,days:cDays.value};
+    var t=fillTemplate(cleaned,c,buildClientLink(bro.value,c));
+    var f=fixMessage(t.text);
+    phoneHint.className="hint"+(p.status==="warn"||p.status==="bad"?" warn":"");
+    phoneHint.textContent="";
+    if(p.status==="empty"){ phoneHint.textContent="اكتبه زي ما هو عندك، بالصفر أو من غيره."; }
+    else{
+      phoneHint.append("هيتبعت على ");
+      var b=document.createElement("b"); b.textContent=pretty(p.digits); phoneHint.append(b);
+      if(p.note) phoneHint.append(" · "+p.note);
+    }
+    msgHint.textContent=f.count? (f.count+" رابط في الرسالة"+(f.fixed?"، واتظبط منهم "+f.fixed+" (https والمسافات).":"، كلهم مظبوطين.")) : "";
+    if(cleaned!==msg.value) msgHint.textContent+=" اتحوّل تنسيق [الاسم](الرابط) والنجوم لشكل واتساب.";
+    msgHint.className="hint"+(t.missing.length?" warn":"");
+    if(t.missing.length) msgHint.textContent="لسه ناقص في بيانات العميل: "+t.missing.join("، ")+".";
+    preview.textContent="";
+    if(!f.parts.length){
+      var e=document.createElement("span"); e.className="empty"; e.textContent="الرسالة هتظهر هنا."; preview.append(e);
+    }else f.parts.forEach(function(part){
+      if(part.link){
+        var a=document.createElement("a"); a.href=part.v; a.target="_blank"; a.rel="noopener"; a.textContent=part.v; preview.append(a);
+      }else part.v.split(/(\*[^*\n]+\*)/).forEach(function(t){
+        if(/^\*[^*\n]+\*$/.test(t)){ var b=document.createElement("b"); b.textContent=t.slice(1,-1); preview.append(b); }
+        else if(t) preview.append(t);
+      });
+    });
+    var ready=(p.status==="ok"||p.status==="warn");
+    if(ready){
+      var url=buildLink(p.digits,f.text);
+      send.href=url; send.setAttribute("aria-disabled","false"); waLink.textContent=url;
+    }else{
+      send.removeAttribute("href"); send.setAttribute("aria-disabled","true"); waLink.textContent="—";
+    }
+  }
+  phone.addEventListener("input",render);
+  msg.addEventListener("input",function(){save("wa_msg",msg.value);render()});
+  country.addEventListener("change",function(){save("wa_country",country.value);render()});
+  send.addEventListener("click",function(ev){ if(send.getAttribute("aria-disabled")==="true") ev.preventDefault(); });
+  [cRest,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
+  bro.addEventListener("input",function(){saveBro();render()});
+  broKeep.addEventListener("change",saveBro);
+  $("chips").addEventListener("click",function(ev){
+    var b=ev.target.closest("button"); if(!b) return;
+    if(b.id==="tpl"){ msg.value=DEFAULT_MSG; }
+    else{
+      var ph=b.getAttribute("data-ph"),a=msg.selectionStart,z=msg.selectionEnd;
+      msg.value=msg.value.slice(0,a)+ph+msg.value.slice(z);
+      msg.focus(); msg.selectionStart=msg.selectionEnd=a+ph.length;
+    }
+    save("wa_msg",msg.value); render();
+  });
+  $("next").addEventListener("click",function(){phone.value=cRest.value=cUser.value=cPass.value="";render();phone.focus()});
+  $("copy").addEventListener("click",function(){
+    var btn=this,t=waLink.textContent; if(t==="—") return;
+    function done(){btn.textContent="اتنسخ";setTimeout(function(){btn.textContent="انسخ الرابط"},1500)}
+    function fallback(){var r=document.createRange();r.selectNodeContents(waLink);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+    try{navigator.clipboard.writeText(t).then(done,fallback)}catch(e){fallback()}
+  });
+  render();
+
+  // تثبيت الأداة كتطبيق (بيشتغل بس في النسخة المرفوعة على https ومعاها manifest)
+  if(document.querySelector('link[rel="manifest"]')){
+    var ib=$("install"),iosHint=$("iosHint"),deferred=null;
+    var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+    if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(function(){});
+    if(!standalone){
+      window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;ib.hidden=false});
+      if(isIOS) ib.hidden=false;
+    }
+    ib.addEventListener("click",function(){
+      if(deferred){
+        deferred.prompt();
+        deferred.userChoice.then(function(c){ if(c&&c.outcome==="accepted") ib.hidden=true; deferred=null; });
+      }else if(isIOS){ iosHint.hidden=!iosHint.hidden; }
+    });
+    window.addEventListener("appinstalled",function(){ib.hidden=true;iosHint.hidden=true;deferred=null});
+  }
+})();
+</script>
+</body>
+</html>
