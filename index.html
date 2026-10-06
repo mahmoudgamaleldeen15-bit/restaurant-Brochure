@@ -374,7 +374,20 @@ nav.scrolled{padding:9px 5%;box-shadow:0 8px 32px rgba(0,0,0,.3)}
 .ur-li:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(10,102,194,.5)}
 .ur-li-note{color:var(--mu);font-size:13px}
 footer .ur-logo{width:132px;border-width:6px;border-radius:10px;box-shadow:none}
-.ur-demo{background:#0e2219;padding:70px 5%;text-align:center}
+.ur-try{flex:1 1 100%;max-width:520px;text-align:center;font-size:19px;padding:19px 36px;animation:urPulse 1.8s ease-out infinite}
+.ur-try::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);animation:urShine 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes urPulse{0%{box-shadow:0 0 0 0 rgba(232,201,122,.7)}70%{box-shadow:0 0 0 20px rgba(232,201,122,0)}100%{box-shadow:0 0 0 0 rgba(232,201,122,0)}}
+@keyframes urShine{0%,55%{left:-60%}100%{left:130%}}
+@keyframes urFlash{0%{box-shadow:0 0 0 0 rgba(232,201,122,.8)}100%{box-shadow:0 0 0 40px rgba(232,201,122,0)}}
+.ur-demo:target .ur-demo-in{animation:urFlash 1.1s ease-out 2}
+.tab-feature.ur-x{background:linear-gradient(150deg,#0e2219,#1b3a28);border:2px solid var(--gold);box-shadow:0 16px 44px rgba(201,168,76,.22);padding-top:44px}
+.tab-feature.ur-x h4{color:#fff;font-size:17px}
+.tab-feature.ur-x ul li{color:rgba(255,255,255,.8)}
+.tab-feature.ur-x ul li::before{color:var(--goldd)}
+.tab-feature.ur-x .tf-tag{background:rgba(232,201,122,.18);color:var(--goldd)}
+.ur-only{position:absolute;top:0;inset-inline:0;background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--g);font-size:11px;font-weight:900;text-align:center;padding:5px 8px}
+@media (prefers-reduced-motion:reduce){.ur-try,.ur-try::after,.ur-demo:target .ur-demo-in{animation:none}}
+.ur-demo{scroll-margin-top:70px;background:#0e2219;padding:70px 5%;text-align:center}
 .ur-demo-in{max-width:760px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:16px;border:1px solid rgba(201,168,76,.45);border-radius:26px;padding:38px 24px;background:rgba(201,168,76,.07)}
 .ur-demo .ur-ey{color:var(--goldd)}
 .ur-demo h2{color:#fff;font-size:clamp(24px,3.6vw,36px);font-weight:900;line-height:1.35}
@@ -468,7 +481,7 @@ footer{background:#060d07;padding:32px 5%;display:flex;justify-content:space-bet
       <h1 id="heroTitle">كل اللي مطعمك<br>محتاجه في <em>مكان واحد</em></h1>
       <p id="heroP">من لحظة استقبال الطلب حتى تسليمه للعميل — نظام متكامل يدير مطعمك بشكل احترافي، يوفّر وقتك، ويزيد مبيعاتك. بدون تعقيد، بدون خبرة تقنية، بدون اشتراك شهري.</p>
       <div class="hbtns" id="heroBtns">
-        <a href="https://wa.me/201508613866" class="btn-g btn-ripple">💬 اطلب النظام دلوقتي</a>
+        <a href="https://wa.me/201508613866?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A3%D8%B3%D8%AA%D8%A7%D8%B0%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%F0%9F%91%8B%0A%D8%B4%D9%88%D9%81%D8%AA%20%D8%B9%D8%B1%D8%B6%20%D9%86%D8%B8%D8%A7%D9%85%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%A7%D9%84%D9%85%D8%B7%D8%A7%D8%B9%D9%85%20%D9%88%D8%B9%D8%A7%D9%88%D8%B2%20%D8%A3%D8%B7%D9%84%D8%A8%20%D8%A7%D9%84%D9%86%D8%B8%D8%A7%D9%85%20%D9%84%D9%85%D8%B7%D8%B9%D9%85%D9%8A.%0A%D9%8A%D8%A7%D8%B1%D9%8A%D8%AA%20%D8%AD%D8%B6%D8%B1%D8%AA%D9%83%20%D8%AA%D8%A8%D8%B9%D8%AA%D9%84%D9%8A%20%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%20%D9%88%D8%AE%D8%B7%D9%88%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D8%B4%D8%BA%D9%8A%D9%84%20%D9%88%D8%A7%D9%84%D9%85%D8%AF%D8%A9%20%D8%A7%D9%84%D9%84%D8%A7%D8%B2%D9%85%D8%A9%20%D9%84%D9%84%D8%AA%D8%B3%D9%84%D9%8A%D9%85.%0A%D8%B4%D9%83%D8%B1%D8%A7%D9%8B%20%D9%84%D8%AD%D8%B6%D8%B1%D8%AA%D9%83." id="urOrder" target="_blank" rel="noopener" class="btn-g btn-ripple">💬 اطلب النظام دلوقتي</a>
         <a href="#screens" class="btn-w">شوف الواجهات</a>
       </div>
       <div class="hstats" id="heroStats">
@@ -823,6 +836,8 @@ footer{background:#060d07;padding:32px 5%;display:flex;justify-content:space-bet
       <div class="tab-feature" style="border-top:3px solid #d97706"><div class="tf-icon">🎀</div><div class="tf-tag" style="background:#fef3c7;color:#d97706">هدايا شخصية</div><h4>هدايا مخصصة لكل عميل</h4><ul><li>ابعت هدية لعميل معين بالاسم والرقم</li><li>خصم مبلغ / خصم نسبة / منتج مجاني / توصيل مجاني</li><li>بتتطبق تلقائياً على طلبه القادم</li></ul></div>
       <div class="tab-feature" style="border-top:3px solid #dc2626"><div class="tf-icon">🚫</div><div class="tf-tag" style="background:#fee2e2;color:#dc2626">الحظر</div><h4>نظام حظر العملاء</h4><ul><li>حظر عميل بالرقم فوراً</li><li>العميل المحظور مش يقدر يطلب</li><li>فك الحظر في أي وقت بضغطة</li></ul></div>
       <div class="tab-feature" style="border-top:3px solid #b45309"><div class="tf-icon">📢</div><div class="tf-tag" style="background:#fef3c7;color:#b45309">الإعلانات</div><h4>بانرات إعلانية داخل التطبيق</h4><ul><li>بانر بصورة أو رسالة نصية أو فيديو</li><li>يظهر في أعلى صفحة العميل</li><li>رابط مباشر لعرض أو قسم معين</li></ul></div>
+      <div class="tab-feature ur-x"><div class="ur-only">⭐ حصري — مش هتلاقيها في أي نظام تاني</div><div class="tf-icon">🕌</div><div class="tf-tag">مواقيت الصلاة</div><h4>مطعمك بيحترم وقت الصلاة</h4><ul><li>التطبيق بيعرّف العميل إن المطعم غير متاح مؤقتاً وقت الصلاة</li><li>مواقيت الصلاة ظاهرة للعميل جوه التطبيق</li><li>شريط أذكار متحرك يذكّر العميل بالصلاة</li><li>لمسة بتكسبك احترام وثقة عملاءك</li></ul></div>
+      <div class="tab-feature ur-x"><div class="ur-only">⭐ حصري — مش هتلاقيها في أي نظام تاني</div><div class="tf-icon">🎮</div><div class="tf-tag">ألعاب داخل التطبيق</div><h4>ألعاب تخلّي العميل يرجعلك</h4><ul><li>لعبة تحدي العداد ولعبة عجلة الحظ جوه تطبيق مطعمك</li><li>هدايا بتوصل أوتوماتيك للعميل الكسبان</li><li>العميل يرجع يلعب ويطلب تاني، ومبيعاتك تزيد معاه</li><li>بتكسر ملل الانتظار وتزوّد ولاء عملاءك ليك</li></ul></div>
     </div>
   </div>
 </section>
@@ -1339,15 +1354,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     var q=new URLSearchParams(location.search);
     function g(k){return (q.get(k)||"").trim().slice(0,60)}
     var r=g("r"),u=g("u"),p=g("p"),d=parseInt(g("h"),10);
-    if(!u&&!p) return;
     var $=function(id){return document.getElementById(id)};
+    var od=$("urOrder");
+    if(od&&r) od.href='https://wa.me/201508613866?text='+encodeURIComponent('السلام عليكم أستاذ محمود 👋\n'+"أنا من "+r+".\n"+'شوفت عرض نظام إدارة المطاعم وعاوز أطلب النظام لمطعمي.\nياريت حضرتك تبعتلي السعر وخطوات التشغيل والمدة اللازمة للتسليم.\nشكراً لحضرتك.');
+    if(!u&&!p) return;
     $("urDemo").hidden=false;
     if(r){var t=$("urDemoTitle");t.textContent="نسخة تجريبية خاصة بـ ";var em=document.createElement("em");em.textContent=r;t.appendChild(em);}
     if(u) $("urUser").textContent=u; else $("urUserBox").hidden=true;
     if(p) $("urPass").textContent=p; else $("urPassBox").hidden=true;
     if(d>0) $("urDays").textContent=d===1?"ساعة واحدة":d===2?"ساعتين":d<=10?d+" ساعات":d+" ساعة"; else $("urDaysBox").hidden=true;
     var hb=$("heroBtns");
-    if(hb){var a=document.createElement("a");a.href="#urDemo";a.className="btn-g";a.textContent="🎯 جرّب نسختك التجريبية";hb.insertBefore(a,hb.firstChild);}
+    if(hb){var a=document.createElement("a");a.href="#urDemo";a.className="btn-g ur-try";a.textContent="🎯 جرّب نسختك التجريبية مجاناً";hb.insertBefore(a,hb.firstChild);if(od)od.className="btn-w";}
     document.querySelectorAll("[data-copy]").forEach(function(b){
       b.addEventListener("click",function(){
         var el=$(b.getAttribute("data-copy")),txt=el.textContent;
