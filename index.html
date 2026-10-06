@@ -466,6 +466,7 @@ nav{gap:12px}
 .nlogo{min-width:0}
 .ncta{white-space:nowrap;flex:none}
 .hbtns{max-width:520px}
+.phone-area{touch-action:pan-y}
 .hbtns .ur-try{max-width:none}
 .hbtns .btn-w{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;padding-inline:16px}
 @media(max-width:620px){
@@ -1104,14 +1105,14 @@ phoneArea.addEventListener('mouseleave', () => {
 
 // Touch support
 phoneArea.addEventListener('touchmove', (e) => {
-  e.preventDefault();
   const t = e.touches[0];
   const rect = phoneArea.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   mouseX = ((t.clientX - cx) / rect.width) * 20;
   mouseY = ((t.clientY - cy) / rect.height) * -15;
-}, { passive: false });
+}, { passive: true });
+['touchend','touchcancel'].forEach(ev => phoneArea.addEventListener(ev, () => { mouseX = 0; mouseY = 0; }, { passive: true }));
 
 function render3D() {
   // Smooth lerp
