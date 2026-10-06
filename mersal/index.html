@@ -114,10 +114,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
       <fieldset class="group">
         <legend>بيانات ديمو العميل</legend>
         <div class="duo">
-          <div class="field"><label for="cRest">اسم المطعم</label><input id="cRest" type="text" dir="auto" autocomplete="off" placeholder="awaad"></div>
-          <div class="field"><label for="cDays">المدة التجريبية (ساعات)</label><input id="cDays" type="number" min="1" max="999" inputmode="numeric" placeholder="24"></div>
-          <div class="field"><label for="cUser">اسم المستخدم</label><input id="cUser" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="awaad"></div>
-          <div class="field"><label for="cPass">الباسورد</label><input id="cPass" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="awaad2026"></div>
+          <div class="field"><label for="cRest">اسم المطعم</label><input id="cRest" type="text" dir="auto" autocomplete="off"></div>
+          <div class="field"><label for="cDays">المدة التجريبية (ساعات)</label><input id="cDays" type="number" min="1" max="999" inputmode="numeric"></div>
+          <div class="field"><label for="cUser">اسم المستخدم</label><input id="cUser" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          <div class="field"><label for="cPass">الباسورد</label><input id="cPass" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
         </div>
       </fieldset>
 
@@ -130,16 +130,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
 
       <div class="field">
         <label for="msg">الرسالة</label>
-        <div class="chips" id="chips" aria-label="حط في الرسالة">
-          <button type="button" class="chip" data-ph="{المطعم}">+ المطعم</button>
-          <button type="button" class="chip" data-ph="{المستخدم}">+ المستخدم</button>
-          <button type="button" class="chip" data-ph="{الباسورد}">+ الباسورد</button>
-          <button type="button" class="chip" data-ph="{المدة}">+ المدة</button>
-          <button type="button" class="chip" data-ph="{الرابط}">+ الرابط</button>
-          <button type="button" class="chip" id="tpl">رسالة جاهزة</button>
-        </div>
+        <div class="chips" id="chips"><button type="button" class="chip" id="tpl">رجّع الرسالة الجاهزة</button></div>
         <textarea id="msg" dir="auto"></textarea>
         <div class="hint" id="msgHint" aria-live="polite"></div>
+        <div class="hint">الكلمات اللي بين { } بتتبدّل لوحدها باسم المطعم والمدة والرابط. سيبها زي ما هي.</div>
       </div>
 
       <div class="actions">
@@ -242,9 +236,12 @@ function cleanMarkdown(src){
 function stripTracking(u){
   return u.replace(/([?&])utm_source=chatgpt\.com&?/gi,"$1").replace(/[?&]$/,"");
 }
-function daysText(n){
-  n=parseInt(n,10); if(!(n>0)) return "";
-  return n===1?"ساعة واحدة":n===2?"ساعتين":n<=10?n+" ساعات":n+" ساعة";
+function unitText(n,one,two,few,many){return n===1?one:n===2?two:n<=10?n+" "+few:n+" "+many}
+// المدة بتتكتب بالساعات، وبتنزل في الرسالة بالأيام لو أيام كاملة (24 = يوم واحد، 48 = يومين)
+function daysText(h){
+  h=parseInt(h,10); if(!(h>0)) return "";
+  if(h%24===0) return unitText(h/24,"يوم واحد","يومين","أيام","يوم");
+  return unitText(h,"ساعة واحدة","ساعتين","ساعات","ساعة");
 }
 // رابط البروشور + بيانات العميل (r المطعم، u المستخدم، p الباسورد، h الساعات)
 function buildClientLink(base,c){
@@ -259,10 +256,10 @@ function buildClientLink(base,c){
   var link=base+(base.indexOf("?")>=0?"&":"?")+qs.join("&");
   return link.replace(/[.!*'):]$/,function(ch){return "%"+ch.charCodeAt(0).toString(16).toUpperCase()});
 }
-var DEFAULT_MSG="السلام عليكم 👋\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\n\nجهّزت لـ *{المطعم}* نسخة تجريبية من نظام إدارة مطاعم متكامل: منيو، طلبات، كاشير، واتساب، ولاء وهدايا، وكله بهوية مطعمك.\n\nشوف البرنامج وجرّبه بنفسك لمدة {المدة} 👇\n{الرابط}\n\n📱 للتواصل المباشر: 01508613866";
+var DEFAULT_MSG="السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n📱 للتواصل المباشر: 01508613866";
 // بيبدّل {المطعم} {المستخدم} {الباسورد} {المدة} {الرابط}؛ ولو {الرابط} مش مكتوب بيتحط في آخر الرسالة
 function fillTemplate(text,c,link){
-  var map={"المطعم":String(c.rest||"").trim(),"المستخدم":String(c.user||"").trim(),"الباسورد":String(c.pass||"").trim(),"المدة":daysText(c.days),"الرابط":link};
+  var map={"المطعم":String(c.rest||"").trim()||"مطعمك","المستخدم":String(c.user||"").trim(),"الباسورد":String(c.pass||"").trim(),"المدة":daysText(c.days),"الرابط":link};
   var missing=[],hasLink=text.indexOf("{الرابط}")>=0;
   var out=text.replace(/\{(المطعم|المستخدم|الباسورد|المدة|الرابط)\}/g,function(m,k){
     if(map[k]) return map[k];
@@ -288,7 +285,7 @@ function buildLink(digits,text){
   function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
   var sc=load("wa_country"); if(sc) country.value=sc;
-  var sm=load("wa_msg"); msg.value=sm||DEFAULT_MSG;
+  var sm=load("wa_msg_v2"); msg.value=sm||DEFAULT_MSG;
   var cRest=$("cRest"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),bro=$("bro"),broKeep=$("broKeep");
   var DEFAULT_BRO="https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/";
   broKeep.checked=load("wa_bro_keep")!=="0";
@@ -316,7 +313,8 @@ function buildLink(digits,text){
     msgHint.textContent=f.count? (f.count+" رابط في الرسالة"+(f.fixed?"، واتظبط منهم "+f.fixed+" (https والمسافات).":"، كلهم مظبوطين.")) : "";
     if(cleaned!==msg.value) msgHint.textContent+=" اتحوّل تنسيق [الاسم](الرابط) والنجوم لشكل واتساب.";
     msgHint.className="hint"+(t.missing.length?" warn":"");
-    if(t.missing.length) msgHint.textContent="لسه ناقص في بيانات العميل: "+t.missing.join("، ")+".";
+    if(t.missing.length) msgHint.textContent="لسه ناقص في بيانات العميل فوق: "+t.missing.join("، ")+".";
+    else if(!cRest.value.trim()&&cleaned.indexOf("{المطعم}")>=0){msgHint.className="hint warn";msgHint.textContent="اسم المطعم فاضي، فهيتكتب «مطعمك» مكانه.";}
     preview.textContent="";
     if(!f.parts.length){
       var e=document.createElement("span"); e.className="empty"; e.textContent="الرسالة هتظهر هنا."; preview.append(e);
@@ -337,7 +335,7 @@ function buildLink(digits,text){
     }
   }
   phone.addEventListener("input",render);
-  msg.addEventListener("input",function(){save("wa_msg",msg.value);render()});
+  msg.addEventListener("input",function(){save("wa_msg_v2",msg.value);render()});
   country.addEventListener("change",function(){save("wa_country",country.value);render()});
   send.addEventListener("click",function(ev){ if(send.getAttribute("aria-disabled")==="true") ev.preventDefault(); });
   [cRest,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
@@ -345,13 +343,8 @@ function buildLink(digits,text){
   broKeep.addEventListener("change",saveBro);
   $("chips").addEventListener("click",function(ev){
     var b=ev.target.closest("button"); if(!b) return;
-    if(b.id==="tpl"){ msg.value=DEFAULT_MSG; }
-    else{
-      var ph=b.getAttribute("data-ph"),a=msg.selectionStart,z=msg.selectionEnd;
-      msg.value=msg.value.slice(0,a)+ph+msg.value.slice(z);
-      msg.focus(); msg.selectionStart=msg.selectionEnd=a+ph.length;
-    }
-    save("wa_msg",msg.value); render();
+    msg.value=DEFAULT_MSG;
+    save("wa_msg_v2",msg.value); render();
   });
   $("next").addEventListener("click",function(){phone.value=cRest.value=cUser.value=cPass.value="";render();phone.focus()});
   $("copy").addEventListener("click",function(){
