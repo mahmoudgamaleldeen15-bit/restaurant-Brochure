@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة مطعمك الذكي — نظام متكامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1b3a28;--gm:#2d6a4f;--gl:#52b788;
+  --gold:#c9a84c;--goldd:#e8c97a;
+  --cream:#f6f4ef;--w:#fff;
+  --tx:#181f14;--mu:#637059;
+  --red:#d62828;--blu:#1565c0;--ora:#e07b00;
+  --pur:#6a0dad;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--cream);color:var(--tx);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:200;background:rgba(27,58,40,.97);backdrop-filter:blur(12px);padding:13px 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);transition:all .3s}
+nav.scrolled{padding:9px 5%;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.nlogo{display:flex;align-items:center;gap:10px;color:var(--goldd);font-size:20px;font-weight:900;letter-spacing:.5px}
+.nlogo span{font-size:28px}
+.ncta{background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--g);padding:10px 26px;border-radius:50px;font-weight:800;font-size:14px;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:.2s;text-decoration:none;display:inline-block}
+.ncta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.4)}
+
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(145deg,#0e2219 0%,#1b3a28 45%,#0a1a10 100%);display:flex;align-items:center;padding:110px 5% 70px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(rgba(82,183,136,.15),transparent 65%);top:-200px;left:-200px;pointer-events:none}
+
+/* Particle canvas */
+#hero-canvas{position:absolute;inset:0;pointer-events:none;opacity:.4}
+
+.hero-in{max-width:1260px;margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr 1fr;gap:70px;align-items:center;position:relative}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.4);color:var(--goldd);padding:7px 18px;border-radius:50px;font-size:13px;font-weight:700;margin-bottom:22px;opacity:0;transform:translateY(20px)}
+.hero h1{font-size:clamp(34px,4.5vw,62px);font-weight:900;color:#fff;line-height:1.18;margin-bottom:18px;opacity:0;transform:translateY(30px)}
+.hero h1 em{color:var(--goldd);font-style:normal}
+.hero p{color:rgba(255,255,255,.72);font-size:17px;line-height:1.85;margin-bottom:34px;max-width:520px;opacity:0;transform:translateY(20px)}
+.hbtns{display:flex;gap:14px;flex-wrap:wrap;align-items:center;opacity:0;transform:translateY(20px)}
+.btn-g{background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--g);padding:15px 36px;border-radius:50px;font-weight:900;font-size:16px;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:.25s;text-decoration:none;display:inline-block;position:relative;overflow:hidden}
+.btn-g::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);opacity:0;transition:.3s}
+.btn-g:hover::before{opacity:1}
+.btn-g:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(201,168,76,.45)}
+.btn-w{background:transparent;color:#fff;padding:15px 36px;border-radius:50px;font-weight:700;font-size:16px;cursor:pointer;border:2px solid rgba(255,255,255,.25);font-family:'Cairo',sans-serif;transition:.25s;text-decoration:none;display:inline-block}
+.btn-w:hover{border-color:var(--goldd);color:var(--goldd)}
+.hstats{display:flex;gap:40px;margin-top:44px;padding-top:36px;border-top:1px solid rgba(255,255,255,.1);opacity:0}
+.hs-n{font-size:30px;font-weight:900;color:var(--goldd)}
+.hs-l{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+
+/* ============================================
+   3D PHONE AREA — ENHANCED
+   ============================================ */
+.phone-area{display:flex;justify-content:center;align-items:center;position:relative;perspective:1000px;cursor:grab;user-select:none}
+.phone-area:active{cursor:grabbing}
+.glow-bg{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(rgba(82,183,136,.28),transparent 65%);animation:gpulse 4s ease-in-out infinite}
+@keyframes gpulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.18);opacity:1}}
+
+/* 3D Phone wrapper */
+.phone-3d-wrapper{position:relative;z-index:2;transform-style:preserve-3d;transition:transform .1s linear}
+.phone-shadow{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:180px;height:20px;background:radial-gradient(ellipse,rgba(0,0,0,.5),transparent 70%);border-radius:50%;filter:blur(8px);transition:all .1s}
+
+.phone{width:272px;background:#080f09;border-radius:44px;padding:11px;box-shadow:
+  0 0 0 1px rgba(255,255,255,.09),
+  0 40px 100px rgba(0,0,0,.7),
+  -8px 20px 40px rgba(82,183,136,.08),
+  8px 20px 40px rgba(0,0,0,.4);
+  animation:pfloat 4.5s ease-in-out infinite;
+  position:relative;
+  transform-style:preserve-3d}
+@keyframes pfloat{0%,100%{transform:translateY(0) rotateX(0)}50%{transform:translateY(-14px) rotateX(2deg)}}
+.phone::before{content:'';position:absolute;inset:0;border-radius:44px;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 50%);pointer-events:none;z-index:10}
+.phone::after{content:'';position:absolute;inset:0;border-radius:44px;box-shadow:inset 0 2px 4px rgba(255,255,255,.12);pointer-events:none;z-index:10}
+.pnotch{width:90px;height:26px;background:#080f09;border-radius:0 0 16px 16px;margin:0 auto 8px;position:relative;z-index:11}
+.psc{background:var(--cream);border-radius:32px;overflow:hidden;height:510px;position:relative}
+
+/* ============================================
+   PHONE SCREEN SLIDES (AUTO-ROTATING)
+   ============================================ */
+.phone-slides{position:absolute;inset:0;border-radius:32px;overflow:hidden}
+.phone-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.phone-slide.active{opacity:1}
+
+/* SLIDE labels & popup tooltips */
+.slide-popup{
+  position:absolute;
+  background:rgba(27,58,40,.95);
+  border:1px solid rgba(201,168,76,.5);
+  border-radius:14px;
+  padding:10px 14px;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(10px) scale(.9);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  z-index:20;
+  box-shadow:0 8px 24px rgba(0,0,0,.4)
+}
+.slide-popup.show{opacity:1;transform:translateY(0) scale(1)}
+.slide-popup-icon{font-size:16px;margin-bottom:3px;display:block}
+.slide-popup-title{color:var(--goldd);font-size:12px;font-weight:900;display:block;margin-bottom:2px}
+.slide-popup-sub{color:rgba(255,255,255,.7);font-size:10px;display:block}
+
+/* Phone navigation dots */
+.phone-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:30}
+.pdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);transition:.3s;cursor:pointer}
+.pdot.active{background:var(--goldd);width:16px;border-radius:3px}
+
+/* slide label outside phone */
+.slide-label-ext{
+  position:absolute;
+  background:var(--goldd);
+  color:var(--g);
+  padding:6px 14px;
+  border-radius:50px;
+  font-size:11px;
+  font-weight:900;
+  bottom:-50px;
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  transition:all .4s;
+  box-shadow:0 4px 16px rgba(201,168,76,.3)
+}
+
+/* app inside phone */
+.abar{background:var(--g);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.alogotext{color:var(--goldd);font-size:13px;font-weight:900}
+.abadge{background:var(--red);color:#fff;font-size:8px;padding:2px 7px;border-radius:50px;font-weight:700}
+.acats{display:flex;gap:5px;padding:8px 10px;background:#fff;border-bottom:1px solid #eaeaea;overflow:hidden}
+.ac{padding:3px 10px;border-radius:50px;font-size:8px;font-weight:700;background:#eef2ee;color:var(--g);white-space:nowrap}
+.ac.on{background:var(--red);color:#fff}
+.ac.gd{background:var(--gold);color:var(--g)}
+.aitems{padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ai{background:#fff;border-radius:11px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:.2s}
+.ai:hover{transform:scale(1.02)}
+.aimg{height:58px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative}
+.abg1{background:linear-gradient(135deg,#2d6a4f,#52b788)}
+.abg2{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.abg3{background:linear-gradient(135deg,#0369a1,#38bdf8)}
+.abg4{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.aib{position:absolute;top:3px;right:3px;font-size:7px;padding:2px 5px;border-radius:50px;font-weight:700}
+.aib.r{background:var(--red);color:#fff}
+.aib.g{background:var(--gold);color:var(--g)}
+.aiinfo{padding:5px 7px}
+.ain{font-size:8px;font-weight:700;color:var(--tx)}
+.aip{font-size:8px;color:var(--gm);font-weight:800}
+.aiol{font-size:7px;color:#bbb;text-decoration:line-through}
+.abot{background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:7px 0;position:absolute;bottom:0;left:0;right:0}
+.atab{text-align:center;font-size:6px;color:var(--mu);cursor:pointer;transition:.2s}
+.atab.on{color:var(--g);font-weight:700}
+.atab:hover{color:var(--g)}
+.atic{font-size:13px}
+
+/* FOOD IMAGES using gradients + emojis for realism */
+.food-img{width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
+.food-img::before{content:'';position:absolute;inset:0;background:inherit;filter:blur(0)}
+.food-img-overlay{position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(transparent,rgba(0,0,0,.3))}
+
+/* ORDER SLIDE */
+.order-slide-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.cart-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #f0f0f0;background:#fff}
+.cart-item-img{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:9px;font-weight:700;color:var(--tx)}
+.cart-item-price{font-size:9px;color:var(--gm);font-weight:800}
+.cart-qty{display:flex;align-items:center;gap:5px}
+.qty-btn{width:18px;height:18px;border-radius:50%;background:var(--g);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.qty-n{font-size:9px;font-weight:800}
+.order-total{padding:10px 12px;background:var(--g);color:#fff}
+.ot-row{display:flex;justify-content:space-between;font-size:8px;margin-bottom:4px;color:rgba(255,255,255,.7)}
+.ot-total{display:flex;justify-content:space-between;font-size:11px;font-weight:900;color:var(--goldd);border-top:1px solid rgba(255,255,255,.2);padding-top:6px;margin-top:2px}
+.order-confirm-btn{background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--g);text-align:center;padding:9px;font-size:10px;font-weight:900}
+
+/* TRACKING SLIDE */
+.trmap{height:120px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.trpin{position:absolute;font-size:22px;animation:tbounce 1.5s infinite}
+@keyframes tbounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.trrt{position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);top:50%}
+
+/* Animated delivery scooter */
+.scooter-anim{position:absolute;font-size:20px;bottom:10px;animation:scoot 3s linear infinite}
+@keyframes scoot{from{right:-30px}to{right:110%}}
+.trstep{display:flex;align-items:center;gap:7px;padding:5px 10px;border-bottom:1px solid #f0f0f0}
+.trck{width:16px;height:16px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
+.trck.p{background:#e5e5e5;color:#aaa}
+
+/* CASHIER SLIDE */
+.csui-slide{flex:1;overflow:hidden}
+.ctop{background:var(--g);padding:9px 12px;display:flex;justify-content:space-between}
+.cord{background:#fff;border-radius:9px;padding:7px 9px;margin:0 8px 6px;border-right:3px solid var(--gl);display:flex;justify-content:space-between;align-items:center}
+.cord.u{border-color:var(--red)}
+.cord.d{border-color:var(--gold);opacity:.7}
+.cn{font-size:8px;font-weight:800;color:var(--tx)}
+.ct{font-size:6px;color:var(--mu)}
+.cs{font-size:7px;padding:2px 6px;border-radius:50px;font-weight:700}
+.cs.nw{background:#dcfce7;color:#16a34a}
+.cs.pr{background:#fef3c7;color:#d97706}
+.cs.rd{background:#dbeafe;color:#1d4ed8}
+.cp{font-size:9px;font-weight:900;color:var(--g)}
+
+/* ADMIN STATS SLIDE */
+.adkpis{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;padding:8px}
+.adkpi{background:#fff;border-radius:9px;padding:8px 6px;text-align:center;border:1px solid #eee}
+.adkv{font-size:14px;font-weight:900}
+.adkl{font-size:6px;color:var(--mu);margin-top:2px}
+.mini-chart{height:60px;background:#fff;margin:0 8px 6px;border-radius:9px;display:flex;align-items:flex-end;padding:6px;gap:3px;border:1px solid #eee}
+.mb{border-radius:3px 3px 0 0;flex:1;transition:height 1s ease}
+
+/* NOTIFICATION SLIDE */
+.notif-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0f0f0;background:#fff}
+.notif-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-text{flex:1}
+.notif-title{font-size:8px;font-weight:800;color:var(--tx)}
+.notif-sub{font-size:7px;color:var(--mu);margin-top:1px}
+.notif-time{font-size:7px;color:#bbb}
+
+/* LOYALTY SLIDE */
+.lyui{height:100%}
+.lyh{background:linear-gradient(135deg,var(--g),var(--gm));padding:14px;color:#fff;text-align:center}
+.lypts{font-size:30px;font-weight:900;color:var(--goldd)}
+.lyprog{background:rgba(255,255,255,.2);border-radius:50px;height:7px;margin:8px 0;overflow:hidden}
+.lybar{background:var(--goldd);height:100%;border-radius:50px;width:0;transition:width 1.5s cubic-bezier(.4,0,.2,1)}
+.lybar.animated{width:84%}
+.lycard{background:#fff;border-radius:9px;padding:7px 9px;margin:0 8px 5px;display:flex;align-items:center;gap:7px;border:1px solid #eee}
+.lci{font-size:16px}
+.lcn{font-size:8px;font-weight:800;color:var(--tx)}
+.lcs{font-size:7px;color:var(--mu)}
+.lcv{font-size:10px;font-weight:900;color:var(--g);margin-right:auto}
+
+/* ============================================
+   PAIN POINTS
+   ============================================ */
+.pain{background:var(--g);padding:80px 5%}
+.pain-in{max-width:1260px;margin:0 auto}
+.pain h2{font-size:clamp(26px,3.5vw,40px);font-weight:900;color:#fff;margin-bottom:10px}
+.pain-sub{color:rgba(255,255,255,.65);font-size:16px;margin-bottom:48px;max-width:560px}
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pain-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px 20px;transition:.3s;opacity:0;transform:translateY(30px)}
+.pain-card.visible{opacity:1;transform:translateY(0)}
+.pain-card:hover{background:rgba(255,255,255,.11);border-color:rgba(201,168,76,.35);transform:translateY(-3px)}
+.pain-icon{font-size:32px;margin-bottom:12px}
+.pain-card h3{font-size:15px;font-weight:800;color:#fff;margin-bottom:7px}
+.pain-card p{font-size:12px;color:rgba(255,255,255,.58);line-height:1.75}
+.pain-sol{font-size:11px;color:var(--goldd);font-weight:700;margin-top:10px;display:flex;align-items:center;gap:5px}
+
+/* ============================================
+   ROLES
+   ============================================ */
+.roles{padding:85px 5%;background:#fff}
+.roles-in{max-width:1260px;margin:0 auto}
+.sec-ey{color:var(--gl);font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px}
+.sec-t{font-size:clamp(26px,3.5vw,42px);font-weight:900;color:var(--g);margin-bottom:13px;line-height:1.25}
+.sec-s{color:var(--mu);font-size:15px;line-height:1.8;max-width:550px}
+.roles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:48px}
+.rcard{border-radius:22px;padding:28px 24px;position:relative;overflow:hidden;transition:.3s;opacity:0;transform:translateY(30px)}
+.rcard.visible{opacity:1;transform:translateY(0)}
+.rcard:hover{transform:translateY(-5px)}
+.rc-admin{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:1.5px solid #a5d6a7}
+.rc-cashier{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:1.5px solid #90caf9}
+.rc-delivery{background:linear-gradient(135deg,#fff8e1,#ffecb3);border:1.5px solid #ffe082}
+.rc-monitor{background:linear-gradient(135deg,#fce4ec,#f8bbd0);border:1.5px solid #f48fb1}
+.rc-client{background:linear-gradient(135deg,#ede7f6,#d1c4e9);border:1.5px solid #b39ddb}
+.rcard-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.rcard-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.rcard h3{font-size:20px;font-weight:900;color:var(--g)}
+.rcard-sub{font-size:13px;color:var(--mu);font-weight:600}
+.rfeats{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.rfeat{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#2d3d2a;line-height:1.5}
+.rfeat::before{content:'✦';color:var(--gm);font-size:10px;flex-shrink:0;margin-top:3px}
+
+/* ============================================
+   TABS SECTION
+   ============================================ */
+.tabs-sec{padding:85px 5%;background:var(--cream)}
+.tabs-sec-in{max-width:1260px;margin:0 auto}
+.tabs-showcase{margin-top:52px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tab-feature{background:#fff;border-radius:20px;padding:24px 20px;border:1.5px solid #e5ebe0;transition:.3s;position:relative;overflow:hidden;opacity:0;transform:translateY(20px)}
+.tab-feature.visible{opacity:1;transform:translateY(0)}
+.tab-feature::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 20px 20px 0}
+.tab-feature:hover{border-color:var(--gl);transform:translateY(-4px);box-shadow:0 16px 44px rgba(27,58,40,.1)}
+.tf-icon{font-size:28px;margin-bottom:12px}
+.tf-tag{display:inline-block;padding:3px 10px;border-radius:50px;font-size:10px;font-weight:700;margin-bottom:10px}
+.tab-feature h4{font-size:16px;font-weight:800;color:var(--g);margin-bottom:8px}
+.tab-feature ul{padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.tab-feature ul li{font-size:12px;color:var(--mu);line-height:1.6;display:flex;gap:7px}
+.tab-feature ul li::before{content:'·';color:var(--gl);font-size:16px;line-height:1;flex-shrink:0}
+
+/* ============================================
+   SCREENS SHOWCASE — ENHANCED
+   ============================================ */
+.screens{padding:85px 5%;background:var(--g)}
+.screens-in{max-width:1260px;margin:0 auto}
+.screens-row{display:flex;gap:24px;justify-content:center;margin-top:52px;flex-wrap:wrap}
+.sc{background:#0d1f14;border-radius:26px;padding:9px;flex-shrink:0;box-shadow:0 24px 64px rgba(0,0,0,.5);transition:.4s;opacity:0;transform:translateY(40px)}
+.sc.visible{opacity:1;transform:translateY(0)}
+.sc:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.sc-ui{background:var(--cream);border-radius:19px;overflow:hidden;position:relative}
+.sc-lbl{text-align:center;margin-top:11px;color:rgba(255,255,255,.75);font-size:11px;font-weight:700}
+/* cashier ui */
+.csui{height:370px}
+/* admin */
+.adui{height:380px}
+.adtabs{display:flex;gap:2px;padding:5px 7px;background:var(--cream);border-bottom:1px solid #ddd;flex-wrap:wrap}
+.adt{font-size:6px;padding:3px 6px;border-radius:50px;background:#e8ede5;color:var(--g);font-weight:700;white-space:nowrap}
+.adt.on{background:var(--g);color:#fff}
+.mch{height:52px;background:#fff;margin:0 6px 6px;border-radius:7px;display:flex;align-items:flex-end;padding:5px;gap:2px;border:1px solid #eee}
+.mb{border-radius:2px 2px 0 0;flex:1}
+/* tracking */
+.trui{height:370px}
+/* loyalty */
+.lyui-sc{height:370px}
+.tpulse{animation:tpulse 1.5s infinite}
+@keyframes tpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+
+/* ============================================
+   ALL IN ONE — NUMBER COUNTER ANIMATION
+   ============================================ */
+.allinone{padding:85px 5%;background:#fff}
+.aio-in{max-width:1260px;margin:0 auto}
+.aio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:50px}
+.aio-card{text-align:center;padding:28px 16px;border-radius:20px;border:1.5px solid #e5ebe0;transition:.4s;opacity:0;transform:scale(.9)}
+.aio-card.visible{opacity:1;transform:scale(1)}
+.aio-card:hover{border-color:var(--gl);background:#f0faf4;transform:translateY(-4px) scale(1.02);box-shadow:0 20px 50px rgba(27,58,40,.1)}
+.aio-num{font-size:42px;font-weight:900;color:var(--g);line-height:1;font-variant-numeric:tabular-nums;transition:.3s}
+.aio-num.highlight{color:var(--gold);transform:scale(1.1)}
+.aio-label{font-size:13px;color:var(--mu);margin-top:6px;font-weight:600}
+
+/* Number ticker effect */
+@keyframes numFlip{
+  0%{transform:translateY(-100%);opacity:0}
+  100%{transform:translateY(0);opacity:1}
+}
+.num-tick{display:inline-block;overflow:hidden;vertical-align:middle}
+.num-tick span{display:block;animation:numFlip .4s cubic-bezier(.4,0,.2,1) both}
+
+/* ============================================
+   CTA
+   ============================================ */
+.cta{background:linear-gradient(145deg,var(--g),#0e2219);padding:95px 5%;text-align:center;position:relative;overflow:hidden}
+.cta::before,.cta::after{content:'';position:absolute;border-radius:50%;pointer-events:none}
+.cta::before{width:600px;height:600px;background:radial-gradient(rgba(201,168,76,.14),transparent 65%);top:-250px;right:-150px}
+.cta::after{width:450px;height:450px;background:radial-gradient(rgba(82,183,136,.12),transparent 65%);bottom:-200px;left:-100px}
+.cta-in{max-width:700px;margin:0 auto;position:relative}
+.cta h2{font-size:clamp(30px,5vw,52px);font-weight:900;color:#fff;line-height:1.22;margin-bottom:16px;opacity:0;transform:translateY(30px)}
+.cta h2 em{color:var(--goldd);font-style:normal}
+.cta p{color:rgba(255,255,255,.68);font-size:16px;margin-bottom:38px;line-height:1.8;opacity:0;transform:translateY(20px)}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0}
+.cta-info{display:flex;justify-content:center;gap:28px;margin-top:30px;flex-wrap:wrap;opacity:0}
+.ci{color:rgba(255,255,255,.65);font-size:13px;display:flex;align-items:center;gap:7px}
+
+/* Ripple button */
+.btn-ripple{position:relative;overflow:hidden}
+.btn-ripple::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.3);width:0;height:0;top:50%;left:50%;transform:translate(-50%,-50%);transition:width .5s,height .5s,opacity .5s;opacity:0}
+.btn-ripple:active::after{width:300px;height:300px;opacity:0}
+
+/* FOOTER */
+footer{background:#060d07;padding:32px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.flogo{color:var(--goldd);font-size:18px;font-weight:900}
+.fcopy{color:rgba(255,255,255,.35);font-size:12px}
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+.scroll-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gl),var(--goldd));z-index:300;width:0%;transition:width .1s}
+
+/* ============================================
+   FLOATING FEATURE BUBBLES (hero)
+   ============================================ */
+.float-bubble{
+  position:absolute;
+  background:rgba(27,58,40,.9);
+  border:1px solid rgba(201,168,76,.3);
+  border-radius:12px;
+  padding:8px 12px;
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  pointer-events:none;
+  white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  opacity:0
+}
+.fb1{top:15%;right:-20px;animation:fbfloat1 6s ease-in-out 2s infinite}
+.fb2{bottom:20%;right:-30px;animation:fbfloat2 7s ease-in-out 3s infinite}
+.fb3{top:40%;left:-30px;animation:fbfloat3 5.5s ease-in-out 1s infinite}
+@keyframes fbfloat1{0%,100%{transform:translateY(0) translateX(0);opacity:0}20%,80%{opacity:1}50%{transform:translateY(-10px) translateX(5px)}}
+@keyframes fbfloat2{0%,100%{transform:translateY(0);opacity:0}20%,80%{opacity:1}50%{transform:translateY(8px)}}
+@keyframes fbfloat3{0%,100%{transform:translateY(0);opacity:0}20%,80%{opacity:1}50%{transform:translateY(-6px)}}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media(max-width:1000px){
+  .hero-in,.pain-grid,.tabs-showcase,.aio-grid{grid-template-columns:1fr 1fr}
+  .roles-grid{grid-template-columns:1fr}
+  .screens-row{gap:14px}
+  .sc{width:180px}
+  .csui,.adui,.trui,.lyui-sc{height:300px}
+}
+@media(max-width:620px){
+  nav{padding:12px 4%}
+  .hero{padding:90px 4% 50px}
+  .hero-in,.pain-grid,.tabs-showcase,.aio-grid{grid-template-columns:1fr}
+  .hstats{gap:24px}
+  .phone-area{margin-top:40px}
+  section,.roles,.tabs-sec,.screens,.allinone,.pain,.cta{padding:60px 4%}
+}
+
+/* ============================================
+   ANIMATED SECTION TITLES
+   ============================================ */
+.reveal-title{opacity:0;transform:translateY(25px);transition:all .7s cubic-bezier(.4,0,.2,1)}
+.reveal-title.visible{opacity:1;transform:translateY(0)}
+.reveal-sub{opacity:0;transform:translateY(15px);transition:all .7s .15s cubic-bezier(.4,0,.2,1)}
+.reveal-sub.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scrollProg"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nlogo"><span>🍽️</span> مطعمك بالذكاء الاصطناعي</div>
+  <a href="https://wa.me/201508613866" class="ncta btn-ripple">💬 تواصل الآن</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-in">
+    <div>
+      <div class="hbadge" id="heroBadge">⚡ نظام إدارة متكامل — جاهز للتشغيل فوراً</div>
+      <h1 id="heroTitle">كل اللي مطعمك<br>محتاجه في <em>مكان واحد</em></h1>
+      <p id="heroP">من لحظة استقبال الطلب حتى تسليمه للعميل — نظام متكامل يدير مطعمك بشكل احترافي، يوفّر وقتك، ويزيد مبيعاتك. بدون تعقيد، بدون خبرة تقنية، بدون اشتراك شهري.</p>
+      <div class="hbtns" id="heroBtns">
+        <a href="https://wa.me/201508613866" class="btn-g btn-ripple">💬 اطلب النظام دلوقتي</a>
+        <a href="#screens" class="btn-w">شوف الواجهات</a>
+      </div>
+      <div class="hstats" id="heroStats">
+        <div><div class="hs-n" data-count="20" data-prefix="+">0</div><div class="hs-l">ميزة متكاملة</div></div>
+        <div><div class="hs-n" data-count="5">0</div><div class="hs-l">أدوار مختلفة</div></div>
+        <div><div class="hs-n" data-count="100" data-suffix="%">0</div><div class="hs-l">بدون تحميل</div></div>
+        <div><div class="hs-n" data-symbol="∞">∞</div><div class="hs-l">عملاء وطلبات</div></div>
+      </div>
+    </div>
+
+    <!-- 3D INTERACTIVE PHONE -->
+    <div class="phone-area" id="phoneArea">
+      <div class="glow-bg"></div>
+      <!-- Float bubbles -->
+      <div class="float-bubble fb1">🔔 طلب جديد وصل!</div>
+      <div class="float-bubble fb2">💰 3,240 ج إيرادات اليوم</div>
+      <div class="float-bubble fb3">⭐ عميل VIP — هدية مستحقة</div>
+
+      <div class="phone-3d-wrapper" id="phone3d">
+        <div class="phone">
+          <div class="pnotch"></div>
+          <div class="psc">
+            <div class="phone-slides" id="phoneSlides">
+
+              <!-- SLIDE 1: MENU / CLIENT VIEW -->
+              <div class="phone-slide active" data-label="🍕 المنيو — تجربة العميل" data-popup-icon="😍" data-popup-title="منيو تفاعلي احترافي" data-popup-sub="صور حقيقية — عروض — أسعار مشطوبة">
+                <div class="abar">
+                  <div class="alogotext">🍽️ مطعمك</div>
+                  <div style="display:flex;gap:5px;align-items:center"><div class="abadge">3 جديد</div><span style="color:rgba(255,255,255,.7);font-size:8px">🟢</span></div>
+                </div>
+                <div class="acats">
+                  <div class="ac gd">🔥 عروض</div>
+                  <div class="ac on">🆕 جديد</div>
+                  <div class="ac">الكل</div>
+                  <div class="ac">🍕 بيتزا</div>
+                </div>
+                <div class="aitems">
+                  <div class="ai">
+                    <div class="aimg abg1" style="height:65px;font-size:32px">🍕<div class="aib r">وفر 30ج</div></div>
+                    <div class="aiinfo"><div class="ain">بيتزا خاصة الشيف</div><div class="aip">95 ج.م</div><div class="aiol">125 ج.م</div></div>
+                  </div>
+                  <div class="ai">
+                    <div class="aimg abg2" style="height:65px;font-size:32px">🥩<div class="aib g">جديد</div></div>
+                    <div class="aiinfo"><div class="ain">ستيك فاخر</div><div class="aip">149 ج.م</div></div>
+                  </div>
+                  <div class="ai">
+                    <div class="aimg abg3" style="height:65px;font-size:32px">🥗</div>
+                    <div class="aiinfo"><div class="ain">سلطة طازجة</div><div class="aip">65 ج.م</div></div>
+                  </div>
+                  <div class="ai">
+                    <div class="aimg abg4" style="height:65px;font-size:32px">🧁</div>
+                    <div class="aiinfo"><div class="ain">حلو الشيف</div><div class="aip">45 ج.م</div></div>
+                  </div>
+                </div>
+                <div class="abot">
+                  <div class="atab on"><div class="atic">🏠</div>الرئيسية</div>
+                  <div class="atab"><div class="atic">🛒</div>السلة</div>
+                  <div class="atab"><div class="atic">📋</div>طلباتي</div>
+                  <div class="atab"><div class="atic">📍</div>تتبع</div>
+                </div>
+              </div>
+
+              <!-- SLIDE 2: ORDER / CART -->
+              <div class="phone-slide" data-label="🛒 الطلب والسلة" data-popup-icon="🛒" data-popup-title="سلة الطلبات" data-popup-sub="تأكيد الطلب في ثواني — الدفع سهل">
+                <div class="abar">
+                  <div class="alogotext">🛒 سلة الطلبات</div>
+                  <div style="color:var(--goldd);font-size:9px;font-weight:700">3 أصناف</div>
+                </div>
+                <div class="order-slide-content">
+                  <div class="cart-item">
+                    <div class="cart-item-img abg1">🍕</div>
+                    <div class="cart-item-info"><div class="cart-item-name">بيتزا خاصة الشيف</div><div class="cart-item-price">95 ج.م</div></div>
+                    <div class="cart-qty"><div class="qty-btn">-</div><div class="qty-n">2</div><div class="qty-btn">+</div></div>
+                  </div>
+                  <div class="cart-item">
+                    <div class="cart-item-img abg2">🥩</div>
+                    <div class="cart-item-info"><div class="cart-item-name">ستيك فاخر</div><div class="cart-item-price">149 ج.م</div></div>
+                    <div class="cart-qty"><div class="qty-btn">-</div><div class="qty-n">1</div><div class="qty-btn">+</div></div>
+                  </div>
+                  <div class="cart-item">
+                    <div class="cart-item-img abg4">🧁</div>
+                    <div class="cart-item-info"><div class="cart-item-name">حلو الشيف</div><div class="cart-item-price">45 ج.م</div></div>
+                    <div class="cart-qty"><div class="qty-btn">-</div><div class="qty-n">1</div><div class="qty-btn">+</div></div>
+                  </div>
+                  <div style="background:#f9fdf9;padding:8px 12px;border-bottom:1px solid #eee">
+                    <div style="display:flex;gap:5px;align-items:center">
+                      <input style="flex:1;border:1px solid #ddd;border-radius:8px;padding:5px 8px;font-size:8px;font-family:Cairo,sans-serif" placeholder="كود خصم (اختياري)">
+                      <div style="background:var(--g);color:#fff;padding:5px 9px;border-radius:8px;font-size:8px;font-weight:700">تطبيق</div>
+                    </div>
+                    <div style="font-size:8px;color:#16a34a;font-weight:700;margin-top:5px">✅ خصم VIP مطبق: وفّرت 30 ج.م</div>
+                  </div>
+                  <div class="order-total">
+                    <div class="ot-row"><span>المجموع</span><span>384 ج.م</span></div>
+                    <div class="ot-row"><span>التوصيل</span><span>25 ج.م</span></div>
+                    <div class="ot-row" style="color:#86efac"><span>خصم VIP</span><span>-30 ج.م</span></div>
+                    <div class="ot-total"><span>الإجمالي</span><span>379 ج.م</span></div>
+                  </div>
+                  <div class="order-confirm-btn">✅ تأكيد الطلب الآن</div>
+                </div>
+                <div class="abot">
+                  <div class="atab"><div class="atic">🏠</div>الرئيسية</div>
+                  <div class="atab on"><div class="atic">🛒</div>السلة</div>
+                  <div class="atab"><div class="atic">📋</div>طلباتي</div>
+                  <div class="atab"><div class="atic">📍</div>تتبع</div>
+                </div>
+              </div>
+
+              <!-- SLIDE 3: TRACKING -->
+              <div class="phone-slide" data-label="📍 تتبع الطلب" data-popup-icon="🛵" data-popup-title="تتبع لحظي مثل Uber" data-popup-sub="العميل يعرف المندوب فين في كل ثانية">
+                <div style="background:var(--g);padding:8px 11px"><span style="color:#fff;font-size:9px;font-weight:700">📍 تتبع طلبك</span></div>
+                <div class="trmap">
+                  <div style="font-size:11px;color:var(--mu);font-weight:700">🗺️ الخريطة</div>
+                  <div class="trpin" style="top:32%;right:38%">📍</div>
+                  <div class="trrt"></div>
+                  <div class="scooter-anim">🛵</div>
+                </div>
+                <div style="padding:8px 10px">
+                  <div style="background:var(--g);color:#fff;border-radius:9px;padding:7px 10px;display:flex;align-items:center;gap:7px;margin-bottom:6px">
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--goldd);flex-shrink:0" class="tpulse"></div>
+                    <div><div style="font-size:9px;font-weight:700">المندوب في الطريق</div><div style="font-size:8px;opacity:.8">⏱️ متبقي ~12 دقيقة</div></div>
+                  </div>
+                  <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">تم استلام الطلب</div></div>
+                  <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">جاري التحضير</div></div>
+                  <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">جاهز للتسليم</div></div>
+                  <div class="trstep"><div class="trck" style="background:var(--goldd);color:var(--g)">🛵</div><div style="font-size:8px;color:var(--gm);font-weight:900">في الطريق إليك</div></div>
+                  <div class="trstep"><div class="trck p">5</div><div style="font-size:8px;color:var(--mu)">تم التسليم</div></div>
+                </div>
+                <div class="abot">
+                  <div class="atab"><div class="atic">🏠</div>الرئيسية</div>
+                  <div class="atab"><div class="atic">🛒</div>السلة</div>
+                  <div class="atab"><div class="atic">📋</div>طلباتي</div>
+                  <div class="atab on"><div class="atic">📍</div>تتبع</div>
+                </div>
+              </div>
+
+              <!-- SLIDE 4: CASHIER -->
+              <div class="phone-slide" data-label="💼 شاشة الكاشير" data-popup-icon="💼" data-popup-title="الكاشير يشوف كل الطلبات" data-popup-sub="تنبيه صوتي فوري — إدارة بضغطة">
+                <div class="ctop">
+                  <span style="color:#fff;font-size:9px;font-weight:700">💼 الكاشير</span>
+                  <span style="color:var(--goldd);font-size:8px">🟢 5 نشطة</span>
+                </div>
+                <div style="padding:7px 0;overflow:hidden">
+                  <div class="cord u">
+                    <div><div class="cn">أحمد سامي 🔴</div><div class="ct">ديليفري — 28 دقيقة</div></div>
+                    <div><div class="cs pr">تحضير</div><div class="cp" style="margin-top:2px">210 ج</div></div>
+                  </div>
+                  <div class="cord">
+                    <div><div class="cn">ريم الأحمدي ⭐</div><div class="ct">كافيه — طاولة 5</div></div>
+                    <div><div class="cs nw">جديد</div><div class="cp" style="margin-top:2px">88 ج</div></div>
+                  </div>
+                  <div class="cord">
+                    <div><div class="cn">عمر ناصر</div><div class="ct">استلام — 4 دقائق</div></div>
+                    <div><div class="cs rd">جاهز</div><div class="cp" style="margin-top:2px">175 ج</div></div>
+                  </div>
+                  <div class="cord d">
+                    <div><div class="cn">منى إبراهيم ✅</div><div class="ct">مكتمل</div></div>
+                    <div><div class="cs" style="background:#f0fdf4;color:#16a34a">مسلّم</div></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 8px 0">
+                    <div style="background:var(--g);color:#fff;border-radius:7px;padding:7px;text-align:center"><div style="font-size:13px;font-weight:900">5</div><div style="font-size:6px;opacity:.8">نشطة</div></div>
+                    <div style="background:#fef3c7;border-radius:7px;padding:7px;text-align:center"><div style="font-size:11px;font-weight:900;color:#d97706">3,240ج</div><div style="font-size:6px;color:#d97706">إيرادات اليوم</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 5: ADMIN REPORTS -->
+              <div class="phone-slide" data-label="📈 تقارير الإدارة" data-popup-icon="📊" data-popup-title="لوحة تحكم الإدارة" data-popup-sub="9 KPIs + رسوم بيانية + تحليل تلقائي">
+                <div style="background:var(--g);padding:8px 11px"><span style="color:var(--goldd);font-size:9px;font-weight:700">📈 تقارير الإدارة</span></div>
+                <div class="adtabs">
+                  <div class="adt on">اليوم</div><div class="adt">أسبوع</div><div class="adt">شهر</div><div class="adt">الكل</div>
+                </div>
+                <div class="adkpis">
+                  <div class="adkpi"><div class="adkv" style="color:var(--gm)">14,200</div><div class="adkl">💰 مبيعات</div></div>
+                  <div class="adkpi"><div class="adkv" style="color:var(--blu)">53</div><div class="adkl">📦 طلبات</div></div>
+                  <div class="adkpi"><div class="adkv" style="color:var(--ora)">268</div><div class="adkl">📊 متوسط</div></div>
+                  <div class="adkpi"><div class="adkv" style="color:var(--pur)">14</div><div class="adkl">👑 VIP</div></div>
+                </div>
+                <div class="mini-chart">
+                  <div class="mb" style="height:38%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+                  <div class="mb" style="height:60%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+                  <div class="mb" style="height:44%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+                  <div class="mb" style="height:85%;background:linear-gradient(180deg,var(--goldd),var(--gold))"></div>
+                  <div class="mb" style="height:52%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+                  <div class="mb" style="height:70%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+                  <div class="mb" style="height:95%;background:linear-gradient(180deg,var(--goldd),var(--gold))"></div>
+                </div>
+                <div style="margin:0 6px 5px;background:#fff;border-radius:7px;padding:6px;border:1px solid #eee">
+                  <div style="font-size:6px;font-weight:700;color:var(--gm);margin-bottom:3px">🔥 أكتر المنتجات</div>
+                  <div style="font-size:6px;color:var(--mu)">1. بيتزا الشيف الخاصة (52×)</div>
+                  <div style="font-size:6px;color:var(--mu)">2. ستيك فاخر بالصوص (41×)</div>
+                  <div style="font-size:6px;color:var(--mu)">3. سلطة الكاشف (33×)</div>
+                </div>
+              </div>
+
+              <!-- SLIDE 6: LOYALTY -->
+              <div class="phone-slide" data-label="⭐ نقاط الولاء" data-popup-icon="🎁" data-popup-title="نظام الولاء والهدايا" data-popup-sub="VIP يكسب نقاط ويستبدلها بكاش باك">
+                <div class="lyh">
+                  <div style="font-size:8px;opacity:.8;margin-bottom:3px">👑 ريم — عميل VIP</div>
+                  <div class="lypts">1,680</div>
+                  <div style="font-size:8px;opacity:.75">نقطة مكتسبة</div>
+                  <div class="lyprog"><div class="lybar" id="loyaltyBar"></div></div>
+                  <div style="display:flex;justify-content:space-between;font-size:7px;opacity:.7"><span>1,680 / 2,000 للجائزة</span><span>84%</span></div>
+                </div>
+                <div style="padding:7px 0">
+                  <div class="lycard" style="margin-bottom:5px;background:linear-gradient(135deg,#dcfce7,#f0fdf4);border-color:#86efac;margin:0 8px 5px">
+                    <div class="lci">🎁</div>
+                    <div><div class="lcn">هدية شخصية!</div><div class="lcs">خصم 50 ج.م — نشطة الآن</div></div>
+                    <div class="lcv" style="color:#16a34a">✓</div>
+                  </div>
+                  <div class="lycard">
+                    <div class="lci">💰</div>
+                    <div><div class="lcn">كاش باك متاح</div><div class="lcs">اضغط للاستخدام</div></div>
+                    <div class="lcv">50 ج</div>
+                  </div>
+                  <div class="lycard">
+                    <div class="lci">🏅</div>
+                    <div><div class="lcn">مسابقة أغسطس 🔥</div><div class="lcs">أنت في المركز الأول 🥇</div></div>
+                    <div class="lcv" style="color:var(--gold)">👑</div>
+                  </div>
+                  <div class="lycard">
+                    <div class="lci">🛵</div>
+                    <div><div class="lcn">توصيل مجاني</div><div class="lcs">هدية من مطعمنا ليكِ!</div></div>
+                    <div class="lcv">🎉</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 7: NOTIFICATIONS / ALERTS -->
+              <div class="phone-slide" data-label="🔔 التنبيهات" data-popup-icon="🔔" data-popup-title="إشعارات Push للعملاء" data-popup-sub="يوصل للموبايل حتى لو التطبيق مغلق">
+                <div style="background:var(--g);padding:8px 11px;display:flex;align-items:center;justify-content:space-between">
+                  <span style="color:#fff;font-size:9px;font-weight:700">🔔 الإشعارات</span>
+                  <span style="background:var(--red);color:#fff;font-size:7px;padding:2px 7px;border-radius:50px;font-weight:700">5 جديد</span>
+                </div>
+                <div style="flex:1;overflow:hidden">
+                  <div class="notif-item" style="background:#fffbeb">
+                    <div class="notif-icon" style="background:#fef3c7">🎁</div>
+                    <div class="notif-text"><div class="notif-title">هدية خاصة ليك!</div><div class="notif-sub">خصم 30ج على طلبك القادم — ينتهي الجمعة</div></div>
+                    <div class="notif-time">الآن</div>
+                  </div>
+                  <div class="notif-item">
+                    <div class="notif-icon" style="background:#dcfce7">✅</div>
+                    <div class="notif-text"><div class="notif-title">طلبك في الطريق</div><div class="notif-sub">المندوب انطلق — متبقي ~15 دقيقة</div></div>
+                    <div class="notif-time">5د</div>
+                  </div>
+                  <div class="notif-item">
+                    <div class="notif-icon" style="background:#dbeafe">🔥</div>
+                    <div class="notif-text"><div class="notif-title">عرض اليوم فقط!</div><div class="notif-sub">بيتزا الشيف — وفّر 40ج ينتهي الساعة 10</div></div>
+                    <div class="notif-time">1س</div>
+                  </div>
+                  <div class="notif-item">
+                    <div class="notif-icon" style="background:#f3e8ff">🏆</div>
+                    <div class="notif-text"><div class="notif-title">أنت الأول في المسابقة!</div><div class="notif-sub">تفوقت على باقي العملاء — استمر 🥇</div></div>
+                    <div class="notif-time">3س</div>
+                  </div>
+                  <div class="notif-item">
+                    <div class="notif-icon" style="background:#fce7f3">⭐</div>
+                    <div class="notif-text"><div class="notif-title">قيّم طلبك</div><div class="notif-sub">تجربتك مهمة جداً لنا — شارك رأيك</div></div>
+                    <div class="notif-time">5س</div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /phone-slides -->
+            <div class="phone-dots" id="phoneDots"></div>
+          </div>
+        </div>
+        <div class="phone-shadow" id="phoneShadow"></div>
+      </div>
+      <div class="slide-label-ext" id="slideLabelExt">🍕 المنيو — تجربة العميل</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN POINTS -->
+<section class="pain">
+  <div class="pain-in">
+    <div class="sec-ey reveal-title" style="color:var(--goldd)">المشاكل اللي بتواجهها</div>
+    <h2 class="reveal-title" style="transition-delay:.1s">مطعمك بيخسر كل يوم بسبب...</h2>
+    <div class="pain-sub reveal-sub">مشاكل تكلفك عملاء وفلوس — والحل موجود دلوقتي</div>
+    <div class="pain-grid">
+      <div class="pain-card"><div class="pain-icon">😤</div><h3>طلبات بتتوه وبتتأخر</h3><p>الكاشير بيكتب الطلبات يدوياً — أخطاء، نسيان، وعميل زعلان في الآخر</p><div class="pain-sol">✦ الطلبات بتوصل للكاشير تلقائياً فوراً بصوت تنبيه</div></div>
+      <div class="pain-card"><div class="pain-icon">📊</div><h3>مش عارف مطعمك بيكسب إيه</h3><p>مفيش تقارير واضحة — مش عارف أنهي منتج بيتباع وأنهي لأ</p><div class="pain-sol">✦ تقارير لحظية بمبيعاتك وأرباحك وأكتر المنتجات طلباً</div></div>
+      <div class="pain-card"><div class="pain-icon">📵</div><h3>العميل مش بيرجعلك</h3><p>مفيش حاجة تخلي العميل يتذكر مطعمك ويرجع يطلب منك تاني</p><div class="pain-sol">✦ نقاط ولاء + هدايا + مسابقات = عميل بيرجع دايماً</div></div>
+      <div class="pain-card"><div class="pain-icon">🛵</div><h3>مش عارف المندوب فين</h3><p>مندوبين بيضيعوا وقت والعميل بيتصل يسأل "الطلب فين؟"</p><div class="pain-sol">✦ العميل يتابع طلبه لحظة بلحظة — زي Uber</div></div>
+      <div class="pain-card"><div class="pain-icon">💸</div><h3>ما بتعرفش تعمل عروض صح</h3><p>العروض اليدوية بتاخد وقت وبتتنسى — والعميل ما بيحسش بيها</p><div class="pain-sol">✦ عروض بسعر مشطوب + badge "وفّر X ج.م" تلقائياً</div></div>
+      <div class="pain-card"><div class="pain-icon">⏰</div><h3>وقتك كله في الإدارة</h3><p>بتقضي وقتك في الحسابات والمتابعة بدل ما تفكر في تطوير مطعمك</p><div class="pain-sol">✦ التقارير والحسابات والمتابعة — كلها تلقائية</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section class="roles">
+  <div class="roles-in">
+    <div class="sec-ey reveal-title">الأدوار</div>
+    <div class="sec-t reveal-title" style="transition-delay:.1s">نظام واحد — كل فرد في فريقك عنده شاشته</div>
+    <div class="sec-s reveal-sub">مش محتاج تشتري أكتر من نظام — كل دور عنده واجهة مخصصة تماماً لاحتياجاته.</div>
+    <div class="roles-grid">
+      <div class="rcard rc-admin"><div class="rcard-head"><div class="rcard-icon" style="background:rgba(45,106,79,.15)">👑</div><div><h3>الأدمن — أنت</h3><div class="rcard-sub">تحكم كامل في كل حاجة</div></div></div><div class="rfeats"><div class="rfeat">تقارير المبيعات والإيرادات — يومي / أسبوعي / شهري / كل الوقت</div><div class="rfeat">إدارة المنيو بالكامل — إضافة / تعديل / حذف / تنظيم الأقسام</div><div class="rfeat">إدارة العروض والخصومات مع تاريخ انتهاء تلقائي</div><div class="rfeat">مسابقات التفاعل مع العملاء وإعلان الفائز تلقائياً</div><div class="rfeat">هدايا شخصية مخصصة لكل عميل — خصم أو منتج أو توصيل</div><div class="rfeat">تقييمات العملاء والمندوبين — كل شيء واضح</div></div></div>
+      <div class="rcard rc-cashier"><div class="rcard-head"><div class="rcard-icon" style="background:rgba(21,101,192,.12)">💼</div><div><h3>الكاشير</h3><div class="rcard-sub">استقبال وإدارة الطلبات لحظياً</div></div></div><div class="rfeats"><div class="rfeat">الطلبات بتوصله تلقائياً بصوت تنبيه فوراً</div><div class="rfeat">يحدّث حالة الطلب: جاري التحضير ← جاهز ← تم التسليم</div><div class="rfeat">يتواصل مع العميل مباشرة بواتساب بضغطة واحدة</div><div class="rfeat">يعرف العملاء VIP فوراً ويعاملهم بشكل مميز</div></div></div>
+      <div class="rcard rc-delivery"><div class="rcard-head"><div class="rcard-icon" style="background:rgba(224,123,0,.12)">🛵</div><div><h3>مندوب الديليفري</h3><div class="rcard-sub">تتبع وتسليم احترافي</div></div></div><div class="rfeats"><div class="rfeat">شاشة مخصصة بطلباته فقط — بدون تشويش</div><div class="rfeat">العميل يتابع موقعه على الخريطة لحظة بلحظة</div><div class="rfeat">يسجّل التسليم بضغطة — الطلب بيتحدث فوراً</div><div class="rfeat">تقييمه بيظهر للأدمن أولاً بأول</div></div></div>
+      <div class="rcard rc-monitor"><div class="rcard-head"><div class="rcard-icon" style="background:rgba(244,143,177,.2)">🖥️</div><div><h3>كافيه مونيتور</h3><div class="rcard-sub">شاشة المطبخ والقاعة</div></div></div><div class="rfeats"><div class="rfeat">شاشة كبيرة بتعرض الطلبات الواردة لحظة بلحظة</div><div class="rfeat">الطاهي يشوف الأصناف المطلوبة بدون ما يبعد عن المطبخ</div><div class="rfeat">تحديث تلقائي بدون أي تدخل من الكاشير</div></div></div>
+    </div>
+    <div class="rcard rc-client" style="margin-top:22px">
+      <div class="rcard-head"><div class="rcard-icon" style="background:rgba(106,13,173,.12)">😍</div><div><h3>العميل — تجربة لا تُنسى</h3><div class="rcard-sub">تجربة طلب احترافية تخليه يرجع دايماً</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px">
+        <div class="rfeat">منيو تفاعلي مع صور وأسعار واضحة</div>
+        <div class="rfeat">تاب العروض 🔥 والجديد 🆕 بشكل مميز</div>
+        <div class="rfeat">سعر مشطوب + badge "وفّر X ج.م"</div>
+        <div class="rfeat">تتبع طلبه لحظة بلحظة على الخريطة</div>
+        <div class="rfeat">بروجرس بار نقاط الولاء — يشوف وصل لفين</div>
+        <div class="rfeat">هدايا وعروض شخصية — بتتطبق تلقائياً</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TABS SECTION -->
+<section class="tabs-sec">
+  <div class="tabs-sec-in">
+    <div class="sec-ey reveal-title">لوحة التحكم</div>
+    <div class="sec-t reveal-title" style="transition-delay:.1s">تابات الأدمن — كل تاب نظام كامل بذاته</div>
+    <div class="sec-s reveal-sub">لوحة تحكم مش بتشوف زيها — كل تاب فيها عالم كامل من الإمكانيات.</div>
+    <div class="tabs-showcase">
+      <div class="tab-feature" style="border-top:3px solid #16a34a"><div class="tf-icon">📦</div><div class="tf-tag" style="background:#dcfce7;color:#16a34a">الطلبات</div><h4>إدارة الطلبات الحية</h4><ul><li>كل الطلبات لحظياً — جديد / تحضير / جاهز / مسلّم</li><li>تصفية حسب النوع: ديليفري / كافيه / استلام</li><li>تواصل فوري مع العميل بالواتساب</li><li>تحديث الحالة بضغطة — العميل بيتبلّغ تلقائياً</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #0369a1"><div class="tf-icon">💼</div><div class="tf-tag" style="background:#dbeafe;color:#1d4ed8">الكاشير</div><h4>شاشة الكاشير المتكاملة</h4><ul><li>صوت تنبيه فور وصول طلب جديد</li><li>عرض الطلبات بالألوان حسب الأولوية</li><li>بوب أب هدايا VIP مع صوت خاص</li><li>إحصائيات اليوم: إيرادات / طلبات / متوسط</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #d97706"><div class="tf-icon">📅</div><div class="tf-tag" style="background:#fef3c7;color:#d97706">الحجوزات</div><h4>نظام حجز الطاولات</h4><ul><li>العميل يحجز طاولة من الموبايل</li><li>كشف الطاولات المتاحة وغير المتاحة</li><li>تأكيد أو رفض الحجز من الأدمن</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #7c3aed"><div class="tf-icon">🍕</div><div class="tf-tag" style="background:#ede7f6;color:#7c3aed">المنيو</div><h4>إدارة المنيو الكاملة</h4><ul><li>إضافة / تعديل / حذف أصناف وأقسام</li><li>أسعار بالأحجام S/M/L أو سعر موحّد</li><li>صور للأصناف وأيقونات إيموجي</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #be185d"><div class="tf-icon">🏷️</div><div class="tf-tag" style="background:#fce7f3;color:#be185d">العروض</div><h4>نظام العروض المتقدم</h4><ul><li>عروض بكوبون أو تلقائية أو VIP فقط</li><li>خصم مبلغ أو نسبة أو منتج مجاني</li><li>حماية خمس طبقات من الاستخدام المزدوج</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #059669"><div class="tf-icon">⚙️</div><div class="tf-tag" style="background:#d1fae5;color:#059669">الإعدادات</div><h4>إعدادات النظام الكاملة</h4><ul><li>بيانات المطعم: اسم / لوجو / رقم / وصف</li><li>ضبط ساعات العمل لكل قسم</li><li>إدارة كلمات سر الكاشير والمندوبين</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #0891b2"><div class="tf-icon">📣</div><div class="tf-tag" style="background:#cffafe;color:#0891b2">الإشعارات</div><h4>إشعارات Push للعملاء</h4><ul><li>ابعت إشعار لكل العملاء بضغطة واحدة</li><li>إشعارات تلقائية للطلبات والعروض</li><li>يوصل للعميل على موبايله حتى لو التطبيق مغلق</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #047857"><div class="tf-icon">🛵</div><div class="tf-tag" style="background:#d1fae5;color:#047857">المندوبين</div><h4>إدارة فريق الديليفري</h4><ul><li>إضافة / تعديل / حذف المندوبين</li><li>تقرير أداء كل مندوب: طلبات / تقييم / شكاوى</li><li>تقييمات العملاء لكل مندوب</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #1565c0"><div class="tf-icon">📊</div><div class="tf-tag" style="background:#e3f2fd;color:#1565c0">الإحصائيات</div><h4>إحصائيات العملاء والتطبيق</h4><ul><li>عدد العملاء الكلي والنشطين والجدد</li><li>معدل عودة العملاء وساعات الذروة</li><li>أكثر المنتجات مبيعاً</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #c2410c"><div class="tf-icon">⭐</div><div class="tf-tag" style="background:#ffedd5;color:#c2410c">نقاط الولاء</div><h4>نظام الولاء والمكافآت</h4><ul><li>كل طلب يكسب نقاط تلقائياً</li><li>العميل يستبدل النقاط بكاش باك</li><li>تقرير كامل بنقاط كل عميل</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #c026d3"><div class="tf-icon">🎁</div><div class="tf-tag" style="background:#fae8ff;color:#c026d3">الهدايا</div><h4>هدايا VIP التلقائية</h4><ul><li>لما العميل يوصل للهدف — كارت احتفالي بـ confetti</li><li>الكاشير بيتبلّغ فوراً بصوت وبوب أب</li><li>تتبع كل عميل VIP — قرّب / مستحق / سلّم</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #0f766e"><div class="tf-icon">🏅</div><div class="tf-tag" style="background:#ccfbf1;color:#0f766e">مسابقات التفاعل</div><h4>مسابقات تزيد المبيعات</h4><ul><li>أكتر طلبات / أعلى مبلغ / أكتر لايكات</li><li>ليدربورد حي يشوفه العملاء — تنافس حقيقي</li><li>إعلان الفائز تلقائياً مع إرسال الجائزة</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #4338ca"><div class="tf-icon">📈</div><div class="tf-tag" style="background:#e0e7ff;color:#4338ca">تقارير الإدارة</div><h4>تقارير ذكية متكاملة</h4><ul><li>ملخص تنفيذي: 9 بطاقات KPI</li><li>6 رسوم بيانية — يومي / أقسام / ساعات / دفع</li><li>تصدير Excel + طباعة احترافية</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #d97706"><div class="tf-icon">🎀</div><div class="tf-tag" style="background:#fef3c7;color:#d97706">هدايا شخصية</div><h4>هدايا مخصصة لكل عميل</h4><ul><li>ابعت هدية لعميل معين بالاسم والرقم</li><li>خصم مبلغ / خصم نسبة / منتج مجاني / توصيل مجاني</li><li>بتتطبق تلقائياً على طلبه القادم</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #dc2626"><div class="tf-icon">🚫</div><div class="tf-tag" style="background:#fee2e2;color:#dc2626">الحظر</div><h4>نظام حظر العملاء</h4><ul><li>حظر عميل بالرقم فوراً</li><li>العميل المحظور مش يقدر يطلب</li><li>فك الحظر في أي وقت بضغطة</li></ul></div>
+      <div class="tab-feature" style="border-top:3px solid #b45309"><div class="tf-icon">📢</div><div class="tf-tag" style="background:#fef3c7;color:#b45309">الإعلانات</div><h4>بانرات إعلانية داخل التطبيق</h4><ul><li>بانر بصورة أو رسالة نصية أو فيديو</li><li>يظهر في أعلى صفحة العميل</li><li>رابط مباشر لعرض أو قسم معين</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN SHOWCASE -->
+<section class="screens" id="screens">
+  <div class="screens-in">
+    <div class="sec-ey reveal-title" style="color:var(--goldd)">الواجهات الحقيقية</div>
+    <div class="sec-t reveal-title" style="color:#fff;transition-delay:.1s">شوف النظام من جوّه</div>
+    <div class="reveal-sub" style="color:rgba(255,255,255,.65);font-size:15px;margin-top:10px">واجهات مصممة بعناية — سهلة الاستخدام، سريعة، واحترافية</div>
+    <div class="screens-row">
+      <!-- CASHIER -->
+      <div class="sc" style="width:210px">
+        <div class="sc-ui csui">
+          <div class="ctop"><span style="color:#fff;font-size:9px;font-weight:700">💼 الكاشير</span><span style="color:var(--goldd);font-size:8px">🟢 5 نشطة</span></div>
+          <div style="padding:7px 0">
+            <div class="cord u"><div><div class="cn">أحمد سامي 🔴</div><div class="ct">ديليفري — 28 دقيقة</div></div><div><div class="cs pr">تحضير</div><div class="cp" style="margin-top:2px">210 ج</div></div></div>
+            <div class="cord"><div><div class="cn">ريم الأحمدي</div><div class="ct">كافيه — طاولة 5</div></div><div><div class="cs nw">جديد</div><div class="cp" style="margin-top:2px">88 ج</div></div></div>
+            <div class="cord"><div><div class="cn">عمر ناصر</div><div class="ct">استلام — 4 دقائق</div></div><div><div class="cs rd">جاهز</div><div class="cp" style="margin-top:2px">175 ج</div></div></div>
+            <div class="cord d"><div><div class="cn">منى إبراهيم ✅</div><div class="ct">مكتمل</div></div><div><div class="cs" style="background:#f0fdf4;color:#16a34a">مسلّم</div></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 8px 0"><div style="background:var(--g);color:#fff;border-radius:7px;padding:7px;text-align:center"><div style="font-size:13px;font-weight:900">5</div><div style="font-size:6px;opacity:.8">نشطة</div></div><div style="background:#fef3c7;border-radius:7px;padding:7px;text-align:center"><div style="font-size:11px;font-weight:900;color:#d97706">3,240ج</div><div style="font-size:6px;color:#d97706">إيرادات اليوم</div></div></div>
+          </div>
+        </div>
+        <div class="sc-lbl">💼 شاشة الكاشير</div>
+      </div>
+      <!-- ADMIN REPORTS -->
+      <div class="sc" style="width:210px">
+        <div class="sc-ui adui">
+          <div style="background:var(--g);padding:8px 11px"><span style="color:var(--goldd);font-size:9px;font-weight:700">📈 تقارير الإدارة</span></div>
+          <div class="adtabs"><div class="adt on">اليوم</div><div class="adt">أسبوع</div><div class="adt">شهر</div><div class="adt">الكل</div></div>
+          <div class="adkpis" style="grid-template-columns:repeat(4,1fr)">
+            <div class="adkpi"><div class="adkv" style="color:var(--gm)">14,200</div><div class="adkl">💰 مبيعات</div></div>
+            <div class="adkpi"><div class="adkv" style="color:var(--blu)">53</div><div class="adkl">📦 طلبات</div></div>
+            <div class="adkpi"><div class="adkv" style="color:var(--ora)">268</div><div class="adkl">📊 متوسط</div></div>
+            <div class="adkpi"><div class="adkv" style="color:var(--pur)">14</div><div class="adkl">👑 VIP</div></div>
+          </div>
+          <div class="mch">
+            <div class="mb" style="height:38%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+            <div class="mb" style="height:60%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+            <div class="mb" style="height:44%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+            <div class="mb" style="height:85%;background:linear-gradient(180deg,var(--goldd),var(--gold))"></div>
+            <div class="mb" style="height:52%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+            <div class="mb" style="height:70%;background:linear-gradient(180deg,var(--gl),var(--gm))"></div>
+            <div class="mb" style="height:95%;background:linear-gradient(180deg,var(--goldd),var(--gold))"></div>
+          </div>
+          <div style="margin:0 6px 5px;background:#fff;border-radius:7px;padding:6px;border:1px solid #eee"><div style="font-size:6px;font-weight:700;color:var(--gm);margin-bottom:3px">🔥 أكتر المنتجات</div><div style="font-size:6px;color:var(--mu)">1. بيتزا الشيف الخاصة (52×)</div><div style="font-size:6px;color:var(--mu)">2. ستيك فاخر بالصوص (41×)</div><div style="font-size:6px;color:var(--mu)">3. سلطة الكاشف (33×)</div></div>
+          <div style="margin:0 6px;background:#fff;border-radius:7px;padding:6px;border:1px solid #eee"><div style="font-size:6px;font-weight:700;color:var(--gm);margin-bottom:2px">🛵 أداء المندوبين</div><div style="font-size:6px;color:var(--mu)">خالد محمود — ⭐ 4.9 (28 طلب)</div><div style="font-size:6px;color:var(--mu)">سامي علي — ⭐ 4.6 (21 طلب)</div></div>
+        </div>
+        <div class="sc-lbl">📈 تقارير الإدارة</div>
+      </div>
+      <!-- TRACKING -->
+      <div class="sc" style="width:210px">
+        <div class="sc-ui trui">
+          <div style="background:var(--g);padding:8px 11px"><span style="color:#fff;font-size:9px;font-weight:700">📍 تتبع طلبك</span></div>
+          <div class="trmap"><div style="font-size:11px;color:var(--mu);font-weight:700">🗺️ الخريطة</div><div class="trpin" style="top:32%;right:38%">📍</div><div class="trrt"></div><div class="scooter-anim">🛵</div></div>
+          <div style="padding:8px 10px">
+            <div style="background:var(--g);color:#fff;border-radius:9px;padding:7px 10px;display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:50%;background:var(--goldd)" class="tpulse"></div><div><div style="font-size:9px;font-weight:700">المندوب في الطريق</div><div style="font-size:8px;opacity:.8">⏱️ متبقي ~12 دقيقة</div></div></div>
+            <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">تم استلام الطلب</div></div>
+            <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">جاري التحضير</div></div>
+            <div class="trstep"><div class="trck">✓</div><div style="font-size:8px;font-weight:700">جاهز للتسليم</div></div>
+            <div class="trstep"><div class="trck" style="background:var(--goldd);color:var(--g)">🛵</div><div style="font-size:8px;color:var(--gm);font-weight:900">في الطريق إليك</div></div>
+            <div class="trstep"><div class="trck p">5</div><div style="font-size:8px;color:var(--mu)">تم التسليم</div></div>
+          </div>
+        </div>
+        <div class="sc-lbl">📍 تتبع الطلب</div>
+      </div>
+      <!-- LOYALTY -->
+      <div class="sc" style="width:210px">
+        <div class="sc-ui lyui-sc">
+          <div class="lyh"><div style="font-size:8px;opacity:.8;margin-bottom:3px">👑 ريم — عميل VIP</div><div class="lypts">1,680</div><div style="font-size:8px;opacity:.75">نقطة مكتسبة</div><div class="lyprog"><div class="lybar animated"></div></div><div style="display:flex;justify-content:space-between;font-size:7px;opacity:.7"><span>1,680 / 2,000 للجائزة</span><span>84%</span></div></div>
+          <div style="padding:7px 0"><div class="lycard" style="margin-bottom:0;background:linear-gradient(135deg,#dcfce7,#f0fdf4);border-color:#86efac;margin:0 8px 5px"><div class="lci">🎁</div><div><div class="lcn">هدية شخصية!</div><div class="lcs">خصم 50 ج.م — نشطة الآن</div></div><div class="lcv" style="color:#16a34a">✓</div></div><div class="lycard"><div class="lci">💰</div><div><div class="lcn">كاش باك متاح</div><div class="lcs">اضغط للاستخدام في سلتك</div></div><div class="lcv">50 ج</div></div><div class="lycard"><div class="lci">🏅</div><div><div class="lcn">مسابقة أغسطس 🔥</div><div class="lcs">أنت في المركز الأول 🥇</div></div><div class="lcv" style="color:var(--gold)">👑</div></div><div class="lycard"><div class="lci">🛵</div><div><div class="lcn">توصيل مجاني</div><div class="lcs">هدية من مطعمنا ليكِ!</div></div><div class="lcv">🎉</div></div></div>
+        </div>
+        <div class="sc-lbl">⭐ نقاط الولاء</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALL IN ONE NUMBERS -->
+<section class="allinone">
+  <div class="aio-in">
+    <div class="sec-ey reveal-title">بالأرقام</div>
+    <div class="sec-t reveal-title" style="transition-delay:.1s">نظام واحد فيه كل ده</div>
+    <div class="aio-grid">
+      <div class="aio-card"><div class="aio-num" data-count="16" data-suffix="+">0</div><div class="aio-label">تاب في لوحة التحكم</div></div>
+      <div class="aio-card"><div class="aio-num" data-count="5">0</div><div class="aio-label">أدوار مختلفة للفريق</div></div>
+      <div class="aio-card"><div class="aio-num" data-count="20" data-suffix="+">0</div><div class="aio-label">ميزة متكاملة</div></div>
+      <div class="aio-card"><div class="aio-num" data-count="0">0</div><div class="aio-label">اشتراك شهري — تملكه للأبد</div></div>
+      <div class="aio-card"><div class="aio-num" data-symbol="∞">∞</div><div class="aio-label">عدد العملاء والطلبات</div></div>
+      <div class="aio-card"><div class="aio-num" data-symbol="24/7">24/7</div><div class="aio-label">النظام شغّال دايماً</div></div>
+      <div class="aio-card"><div class="aio-num" data-count="1">0</div><div class="aio-label">سعر واحد — كل المميزات</div></div>
+      <div class="aio-card"><div class="aio-num" data-count="0">0</div><div class="aio-label">تحميل من المتجر — يشتغل على المتصفح</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-in">
+    <div class="sec-ey" style="color:var(--goldd);display:block;text-align:center;margin-bottom:16px">خطوة واحدة</div>
+    <h2 id="ctaTitle">مطعمك يستاهل نظام<br>بـ<em>مستوى مختلف</em></h2>
+    <p id="ctaP">سعر واحد — كل المميزات — تملكه للأبد. مفيش اشتراك شهري، مفيش مفاجآت. تواصل دلوقتي وشوف النظام بعينك.</p>
+    <div class="cta-btns" id="ctaBtns">
+      <a href="https://wa.me/201508613866" class="btn-g btn-ripple" style="font-size:16px;padding:16px 40px">💬 تواصل على واتساب</a>
+    </div>
+    <div class="cta-info" id="ctaInfo">
+      <div class="ci"><span style="font-size:18px">📱</span> 01508613866</div>
+      <div class="ci"><span style="font-size:18px">⚡</span> رد خلال ساعة</div>
+      <div class="ci"><span style="font-size:18px">🎯</span> نسخة ديمو للتجربه قبل الشراء</div>
+      <div class="ci"><span style="font-size:18px">🔒</span> سعر واحد — كل المميزات</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">🍽️ نظام إدارة مطعمك الذكي</div>
+  <div class="fcopy">© 2026 — Urcod — جميع الحقوق محفوظة</div>
+</footer>
+
+<script>
+// ============================================
+// GSAP REGISTER
+// ============================================
+gsap.registerPlugin(ScrollTrigger);
+
+// ============================================
+// SCROLL PROGRESS BAR
+// ============================================
+window.addEventListener('scroll', () => {
+  const prog = document.getElementById('scrollProg');
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  prog.style.width = pct + '%';
+  // Nav shrink
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ============================================
+// HERO PARTICLE CANVAS
+// ============================================
+const canvas = document.getElementById('hero-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 0.5,
+    dx: (Math.random() - 0.5) * 0.4,
+    dy: (Math.random() - 0.5) * 0.4,
+    o: Math.random() * 0.6 + 0.2
+  });
+}
+
+function animParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(82,183,136,${p.o})`;
+    ctx.fill();
+    p.x += p.dx; p.y += p.dy;
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+  });
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+// ============================================
+// HERO ENTRANCE ANIMATIONS (GSAP)
+// ============================================
+const heroTl = gsap.timeline({ delay: 0.2 });
+heroTl
+  .to('#heroBadge', { opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.7)' })
+  .to('#heroTitle', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.3')
+  .to('#heroP', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+  .to('#heroBtns', { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3')
+  .to('#heroStats', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.2')
+  .to('#phone3d', { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.8');
+
+// Stats number counter (hero)
+function animateCount(el) {
+  if (el.dataset.symbol) return; // skip symbols
+  const target = parseInt(el.dataset.count);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1500;
+  const start = Date.now();
+  function tick() {
+    const elapsed = Date.now() - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(eased * target);
+    el.textContent = prefix + current + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+setTimeout(() => {
+  document.querySelectorAll('#heroStats .hs-n[data-count]').forEach(animateCount);
+}, 1200);
+
+// ============================================
+// 3D PHONE — MOUSE PARALLAX
+// ============================================
+const phoneArea = document.getElementById('phoneArea');
+const phone3d = document.getElementById('phone3d');
+const phoneShadow = document.getElementById('phoneShadow');
+let mouseX = 0, mouseY = 0;
+let currentX = 0, currentY = 0;
+
+phoneArea.addEventListener('mousemove', (e) => {
+  const rect = phoneArea.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  mouseX = ((e.clientX - cx) / rect.width) * 30;  // max 30deg
+  mouseY = ((e.clientY - cy) / rect.height) * -20; // max 20deg
+});
+phoneArea.addEventListener('mouseleave', () => {
+  mouseX = 0; mouseY = 0;
+});
+
+// Touch support
+phoneArea.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const rect = phoneArea.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  mouseX = ((t.clientX - cx) / rect.width) * 20;
+  mouseY = ((t.clientY - cy) / rect.height) * -15;
+}, { passive: false });
+
+function render3D() {
+  // Smooth lerp
+  currentX += (mouseX - currentX) * 0.08;
+  currentY += (mouseY - currentY) * 0.08;
+
+  phone3d.style.transform = `
+    rotateY(${currentX}deg)
+    rotateX(${currentY}deg)
+  `;
+  // Shadow depth
+  const depth = Math.abs(currentX) + Math.abs(currentY);
+  phoneShadow.style.transform = `translateX(-50%) scaleX(${1 + depth * 0.01}) translateY(${depth * 0.3}px)`;
+  phoneShadow.style.opacity = 0.4 + depth * 0.01;
+
+  requestAnimationFrame(render3D);
+}
+render3D();
+
+// ============================================
+// PHONE SLIDE AUTO-ROTATE + POPUP SYSTEM
+// ============================================
+const slides = document.querySelectorAll('.phone-slide');
+const dotsContainer = document.getElementById('phoneDots');
+const labelExt = document.getElementById('slideLabelExt');
+let currentSlide = 0;
+let slideTimer;
+let popupTimeout;
+
+// Create dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'pdot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goToSlide(i));
+  dotsContainer.appendChild(dot);
+});
+
+function showPopup(slide) {
+  // Remove old popup
+  document.querySelectorAll('.slide-popup').forEach(p => p.remove());
+
+  const icon = slide.dataset.popupIcon;
+  const title = slide.dataset.popupTitle;
+  const sub = slide.dataset.popupSub;
+  if (!title) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'slide-popup';
+  popup.style.cssText = 'left:50%;top:' + (Math.random() > 0.5 ? '15%' : '70%') + ';transform:translateX(-50%)';
+  popup.innerHTML = `<span class="slide-popup-icon">${icon}</span><span class="slide-popup-title">${title}</span><span class="slide-popup-sub">${sub}</span>`;
+  phoneArea.appendChild(popup);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => popup.classList.add('show'));
+  });
+
+  clearTimeout(popupTimeout);
+  popupTimeout = setTimeout(() => {
+    popup.classList.remove('show');
+    setTimeout(() => popup.remove(), 400);
+  }, 2800);
+}
+
+function goToSlide(idx) {
+  slides[currentSlide].classList.remove('active');
+  document.querySelectorAll('.pdot')[currentSlide].classList.remove('active');
+  currentSlide = idx;
+  slides[currentSlide].classList.add('active');
+  document.querySelectorAll('.pdot')[currentSlide].classList.add('active');
+
+  const slide = slides[currentSlide];
+  labelExt.textContent = slide.dataset.label || '';
+  labelExt.style.transform = 'translateX(-50%) scale(1.08)';
+  setTimeout(() => labelExt.style.transform = 'translateX(-50%) scale(1)', 300);
+
+  // Loyalty bar animation
+  if (currentSlide === 5) {
+    setTimeout(() => {
+      document.getElementById('loyaltyBar').classList.add('animated');
+    }, 600);
+  }
+
+  showPopup(slide);
+  resetTimer();
+}
+
+function resetTimer() {
+  clearInterval(slideTimer);
+  slideTimer = setInterval(() => {
+    goToSlide((currentSlide + 1) % slides.length);
+  }, 3500);
+}
+
+resetTimer();
+setTimeout(() => showPopup(slides[0]), 1500);
+
+// ============================================
+// SCROLL REVEAL — Generic
+// ============================================
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal-title, .reveal-sub').forEach(el => revealObs.observe(el));
+
+// ============================================
+// PAIN CARDS — STAGGER
+// ============================================
+const painObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.pain-card').forEach((card, i) => {
+      setTimeout(() => card.classList.add('visible'), i * 100);
+    });
+    painObs.disconnect();
+  }
+}, { threshold: 0.1 });
+const firstPain = document.querySelector('.pain-card');
+if (firstPain) painObs.observe(firstPain.closest('.pain-grid'));
+
+// ============================================
+// ROLE CARDS — STAGGER
+// ============================================
+const roleObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.rcard').forEach((card, i) => {
+      setTimeout(() => card.classList.add('visible'), i * 120);
+    });
+    roleObs.disconnect();
+  }
+}, { threshold: 0.1 });
+const firstRole = document.querySelector('.rcard');
+if (firstRole) roleObs.observe(firstRole.closest('.roles-grid') || firstRole.parentElement);
+
+// ============================================
+// TAB FEATURES — STAGGER
+// ============================================
+const tabObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.tab-feature').forEach((el, i) => {
+  el.style.transitionDelay = (i % 3) * 80 + 'ms';
+  tabObs.observe(el);
+});
+
+// ============================================
+// SCREENS — STAGGER
+// ============================================
+const screenObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.sc').forEach((sc, i) => {
+      setTimeout(() => sc.classList.add('visible'), i * 150);
+    });
+    screenObs.disconnect();
+  }
+}, { threshold: 0.1 });
+const firstSc = document.querySelector('.sc');
+if (firstSc) screenObs.observe(firstSc.closest('.screens-row'));
+
+// Animate chart bars on scroll
+const barObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.mb').forEach(b => {
+        const h = b.style.height; b.style.height = '0';
+        setTimeout(() => { b.style.transition = 'height 1s ease'; b.style.height = h; }, 100);
+      });
+    }
+  });
+}, { threshold: .3 });
+document.querySelectorAll('.mch').forEach(el => barObs.observe(el));
+
+// ============================================
+// AIO NUMBER CARDS — STAGGER + COUNT
+// ============================================
+const aioObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.aio-card').forEach((card, i) => {
+      setTimeout(() => {
+        card.classList.add('visible');
+        const numEl = card.querySelector('.aio-num');
+        if (numEl && numEl.dataset.count !== undefined) {
+          animateCount(numEl);
+        }
+        // Flash highlight
+        setTimeout(() => {
+          numEl.classList.add('highlight');
+          setTimeout(() => numEl.classList.remove('highlight'), 400);
+        }, 200);
+      }, i * 100);
+    });
+    aioObs.disconnect();
+  }
+}, { threshold: 0.1 });
+const firstAio = document.querySelector('.aio-card');
+if (firstAio) aioObs.observe(firstAio.closest('.aio-grid'));
+
+// ============================================
+// CTA SECTION ANIMATIONS
+// ============================================
+ScrollTrigger.create({
+  trigger: '.cta',
+  start: 'top 75%',
+  onEnter: () => {
+    gsap.to('#ctaTitle', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
+    gsap.to('#ctaP', { opacity: 1, y: 0, duration: 0.6, delay: 0.15, ease: 'power2.out' });
+    gsap.to('#ctaBtns', { opacity: 1, duration: 0.5, delay: 0.3, ease: 'power2.out' });
+    gsap.to('#ctaInfo', { opacity: 1, duration: 0.5, delay: 0.45, ease: 'power2.out' });
+  }
+});
+
+// ============================================
+// RIPPLE EFFECT
+// ============================================
+document.querySelectorAll('.btn-ripple').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const ripple = document.createElement('span');
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2;
+    ripple.style.cssText = `
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,0.4);
+      width:${size}px;height:${size}px;
+      left:${e.clientX - rect.left - size/2}px;
+      top:${e.clientY - rect.top - size/2}px;
+      pointer-events:none;
+      animation:rippleAnim .6s linear;
+    `;
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
+
+// Ripple keyframe
+const rippleStyle = document.createElement('style');
+rippleStyle.textContent = '@keyframes rippleAnim{from{transform:scale(0);opacity:.6}to{transform:scale(1);opacity:0}}';
+document.head.appendChild(rippleStyle);
+
+// ============================================
+// SMOOTH SCROLL
+// ============================================
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
