@@ -136,6 +136,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
         <div class="hint">الكلمات اللي بين { } بتتبدّل لوحدها باسم المطعم والمدة والرابط. سيبها زي ما هي.</div>
       </div>
 
+      <label class="check" id="useWebRow"><input type="checkbox" id="useWeb" checked> افتح في واتساب ويب (الإيموجي بتوصل سليمة)</label>
+
       <div class="actions">
         <a class="send" id="send" target="_blank" rel="noopener" aria-disabled="true">افتح واتساب وابعت</a>
         <button class="ghost" id="next" type="button">عميل جديد</button>
@@ -269,7 +271,9 @@ function fillTemplate(text,c,link){
   if(!hasLink && link) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+link;
   return {text:out,missing:missing};
 }
-function buildLink(digits,text){
+// web=true: واتساب ويب مباشرة (على الكمبيوتر برنامج واتساب بيبوّظ الإيموجي اللي جاية من الرابط)
+function buildLink(digits,text,web){
+  if(web) return "https://web.whatsapp.com/send?phone="+digits+(text?"&text="+encodeURIComponent(text):"");
   return "https://wa.me/"+digits+(text?"?text="+encodeURIComponent(text):"");
 }
 /*PURE-END*/
@@ -295,6 +299,10 @@ function buildLink(digits,text){
     if(broKeep.checked) save("wa_bro",bro.value.trim()); else{try{localStorage.removeItem("wa_bro")}catch(e){}}
   }
 
+  var useWeb=$("useWeb"),isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  useWeb.checked=load("wa_web")!=="0";
+  if(isMobile) $("useWebRow").hidden=true;
+  useWeb.addEventListener("change",function(){save("wa_web",useWeb.checked?"1":"0");render()});
   function pretty(d){return "+"+d}
   function render(){
     var p=normalizePhone(phone.value,country.value);
@@ -328,7 +336,7 @@ function buildLink(digits,text){
     });
     var ready=(p.status==="ok"||p.status==="warn");
     if(ready){
-      var url=buildLink(p.digits,f.text);
+      var url=buildLink(p.digits,f.text,!isMobile&&useWeb.checked);
       send.href=url; send.setAttribute("aria-disabled","false"); waLink.textContent=url;
     }else{
       send.removeAttribute("href"); send.setAttribute("aria-disabled","true"); waLink.textContent="—";
