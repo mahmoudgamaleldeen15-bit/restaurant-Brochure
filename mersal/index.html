@@ -89,6 +89,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
 .bubble .empty{color:var(--muted)}
 .linkbox{display:flex;flex-direction:column;gap:6px;min-width:0}
 .linkbox code{font-family:var(--f-mono);font-size:.8rem;direction:ltr;text-align:left;display:block;background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere;user-select:all;max-height:7.5em;overflow:auto;color:var(--muted)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.thumb{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.thumb img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--bg)}
+.thumb div{display:flex}
+.thumb button,.thumb a{flex:1;font:inherit;font-size:.78rem;font-weight:600;background:transparent;color:var(--ink);border:0;border-top:1.5px solid var(--line);padding:5px 4px;cursor:pointer;text-align:center;text-decoration:none}
+.thumb button+button,.thumb button+a{border-inline-start:1.5px solid var(--line)}
+.filebtn{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.88rem;color:var(--ink);border:1.5px dashed var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;width:max-content;max-width:100%}
+.filebtn:hover{border-color:var(--c-accent)}
+.filebtn input{position:absolute;width:1px;height:1px;opacity:0}
+textarea.small{min-height:96px}
 @media (prefers-reduced-motion:reduce){.band{transition:none}}
 </style>
 
@@ -136,6 +146,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
         <div class="field"><label for="lLi">LinkedIn (اختياري)</label><input id="lLi" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://linkedin.com/in/..."></div>
         <label class="check"><input type="checkbox" id="linksKeep" checked> افتكر روابط القسم ده للمرات الجاية</label>
         <div class="hint" id="linksHint"></div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>شرح التثبيت والتشغيل (اختياري)</legend>
+        <div class="field"><label for="gLink">رابط الشرح (فيديو أو صفحة)</label><input id="gLink" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://..."></div>
+        <div class="field"><label for="gText">خطوات مكتوبة</label><textarea id="gText" class="small" dir="auto" placeholder="1- افتح الرابط من كروم&#10;2- دوس «تثبيت التطبيق»&#10;3- ادخل باسم المستخدم والباسورد"></textarea></div>
+        <div class="field">
+          <span class="lbl" style="font-weight:500;font-size:.85rem;color:var(--muted)">صور الشرح</span>
+          <label class="filebtn">＋ ضيف صور<input id="gFiles" type="file" accept="image/*" multiple></label>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="actions" id="shareRow" hidden><button class="ghost" id="shareImgs" type="button">شارك الصور على واتساب</button></div>
+          <div class="hint" id="imgHint">واتساب مش بيسمح إن الصور تتبعت مع الرسالة نفسها. ابعت الرسالة الأول، وبعدها على الكمبيوتر دوس «انسخ» تحت الصورة والصقها في الشات بـ Ctrl+V، وعلى الموبايل دوس «شارك الصور على واتساب» واختار العميل.</div>
+        </div>
       </fieldset>
 
       <div class="field">
@@ -271,7 +294,7 @@ function buildClientLink(base,c){
 
 var CONTACT="📱 للتواصل المباشر: 01508613866";
 var MY_LI="https://www.linkedin.com/in/mahmoud-gamal-eldeen-073967440/";
-var LINKS_BLOCK="💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT;
+var LINKS_BLOCK="{التشغيل}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT;
 var DEMO_BLOCK="📘 تفاصيل النظام: {البروشور}\n🎯 جرّب النسخة التجريبية بنفسك: {الديمو}\n👤 اسم المستخدم: {المستخدم}\n🔑 الباسورد: {الباسورد}\n⏳ مدة التجربة: {المدة}";
 
 // الأقسام: كل قسم له اسم وألوانه (في الـ CSS) وحقوله ورسالته
@@ -279,7 +302,7 @@ var CATS={
   rest:{label:"مطاعم",dot:"#1f7a4f",title:"قسم المطاعم",nameLbl:"اسم المطعم",nameFb:"مطعمك",
     fields:["hours","user","pass"],broLbl:"رابط البروشور",bro:"https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/",li:"",
     clientLink:true,required:["المدة"],msgKey:"wa_msg_v2",
-    msg:"السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT},
+    msg:"السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n{التشغيل}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT},
   gym:{label:"جيم",dot:"#dc2626",title:"قسم الجيم",nameLbl:"اسم الجيم",nameFb:"الجيم بتاعك",
     fields:["demo","hours","user","pass"],broLbl:"رابط بروشور الجيم (اختياري)",
     msg:"السلام عليكم 👋\nكام مشترك في *{الاسم}* خلص اشتراكه ومجدّدش، أو عليه فلوس محدش فاكرها؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\nعملت نظام إدارة جيم بيمسك الحسابات كلها: اشتراكات بكل المدد، تجديد، عربون ومديونيات، ودخول المشترك بـ QR بيقف لوحده لو عليه فلوس متأخرة.\n\nوكل موظف بيدخل بحساب وكود خاص، فمحدش يقدر يلعب في الأرقام من وراك، والمشترك عنده تطبيق باسم الجيم ولوجو الجيم على موبايله.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
@@ -309,10 +332,10 @@ function fillTemplate(text,vals,cat){
     "البرنامج":vals.prog||"برنامجنا",
     "المستخدم":vals.user||"", "الباسورد":vals.pass||"", "المدة":daysText(vals.hours),
     "البروشور":vals.bro||"", "الرابط":vals.bro||"", "الديمو":vals.demo||"",
-    "فيسبوك":vals.fb||"", "لينكدإن":vals.li||""
+    "فيسبوك":vals.fb||"", "لينكدإن":vals.li||"", "التشغيل":guideBlock(vals.gText,vals.gLink)
   };
   var required=cat.required||[], missing=[];
-  var TOK=/\{(الاسم|المطعم|البرنامج|المستخدم|الباسورد|المدة|البروشور|الرابط|الديمو|فيسبوك|لينكدإن)\}/g;
+  var TOK=/\{(الاسم|المطعم|البرنامج|المستخدم|الباسورد|المدة|البروشور|الرابط|الديمو|فيسبوك|لينكدإن|التشغيل)\}/g;
   var lines=text.split("\n").filter(function(line){
     var drop=false; line.replace(TOK,function(m,k){ if(!map[k] && required.indexOf(k)<0) drop=true; return m; });
     return !drop;
@@ -323,8 +346,18 @@ function fillTemplate(text,vals,cat){
     return m;
   });
   if(cat.clientLink && text.indexOf("{الرابط}")<0 && text.indexOf("{البروشور}")<0 && vals.bro) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+vals.bro;
+  if(text.indexOf("{التشغيل}")<0 && map["التشغيل"]) out=out.replace(/\s+$/,"")+"\n\n"+map["التشغيل"];
   out=out.replace(/\n{3,}/g,"\n\n").replace(/^\s+|\s+$/g,"");
   return {text:out,missing:missing};
+}
+// فقرة شرح التثبيت: عنوان + الخطوات المكتوبة + رابط الشرح (اللي موجود منهم بس)
+function guideBlock(text,link){
+  text=String(text||"").trim(); link=String(link||"").trim();
+  if(!text&&!link) return "";
+  var out="🛠️ *طريقة التثبيت والتشغيل:*";
+  if(text) out+="\n"+text;
+  if(link) out+="\n▶️ الشرح كامل: "+link;
+  return out;
 }
 // web=true: واتساب ويب مباشرة (على الكمبيوتر برنامج واتساب بيبوّظ الإيموجي اللي جاية من الرابط)
 function buildLink(digits,text,web){
@@ -342,7 +375,8 @@ function buildLink(digits,text,web){
   var app=$("app"),country=$("country"),phone=$("phone"),msg=$("msg"),send=$("send"),
       phoneHint=$("phoneHint"),msgHint=$("msgHint"),preview=$("preview"),waLink=$("waLink"),
       cName=$("cName"),cProg=$("cProg"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),
-      lBro=$("lBro"),lDemo=$("lDemo"),lFb=$("lFb"),lLi=$("lLi"),linksKeep=$("linksKeep");
+      lBro=$("lBro"),lDemo=$("lDemo"),lFb=$("lFb"),lLi=$("lLi"),linksKeep=$("linksKeep"),
+      gLink=$("gLink"),gText=$("gText");
   COUNTRIES.forEach(function(c){var o=document.createElement("option");o.value=c[1];o.textContent=c[0]+" +"+c[1];country.appendChild(o)});
   var sc=load("wa_country"); if(sc) country.value=sc;
 
@@ -375,6 +409,8 @@ function buildLink(digits,text,web){
     });
     $("linksHint").textContent=c.clientLink?"بيانات العميل بتتضاف على رابط البروشور لوحدها، والبروشور بيعرضها له.":"كل الروابط اختيارية، واللي تسيبه فاضي سطره مش هيظهر في الرسالة.";
     msg.value=load(msgKey(k))||c.msg;
+    gLink.value=load("wa_glink_"+k)||""; gText.value=load("wa_gtext_"+k)||"";
+    showImages();
     $("phHint").textContent="الكلمات اللي بين { } بتتبدّل لوحدها ببيانات العميل والروابط. سيبها زي ما هي.";
     render();
   }
@@ -397,7 +433,8 @@ function buildLink(digits,text,web){
     var vals={
       name:cName.value.trim(), prog:has("prog")?cProg.value.trim():"",
       user:has("user")?cUser.value.trim():"", pass:has("pass")?cPass.value.trim():"", hours:has("hours")?cDays.value:"",
-      demo:has("demo")?cleanUrl(lDemo.value):"", fb:cleanUrl(lFb.value), li:cleanUrl(lLi.value)
+      demo:has("demo")?cleanUrl(lDemo.value):"", fb:cleanUrl(lFb.value), li:cleanUrl(lLi.value),
+      gLink:cleanUrl(gLink.value), gText:gText.value
     };
     vals.bro=c.clientLink?buildClientLink(lBro.value,{rest:vals.name,user:vals.user,pass:vals.pass,days:vals.hours}):cleanUrl(lBro.value);
     var t=fillTemplate(cleaned,vals,c);
@@ -442,6 +479,85 @@ function buildLink(digits,text,web){
   [cName,cProg,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
   Object.keys(LINK_INPUTS).forEach(function(f){LINK_INPUTS[f].addEventListener("input",function(){saveLinks();render()})});
   linksKeep.addEventListener("change",saveLinks);
+  gLink.addEventListener("input",function(){save("wa_glink_"+cur,gLink.value.trim());render()});
+  gText.addEventListener("input",function(){save("wa_gtext_"+cur,gText.value);render()});
+
+  // ===== صور الشرح: متخزنة على الجهاز (IndexedDB) لكل قسم لوحده =====
+  var dbp=null;
+  function db(){
+    if(dbp) return dbp;
+    dbp=new Promise(function(res,rej){
+      try{var r=indexedDB.open("mersal",1);
+        r.onupgradeneeded=function(){r.result.createObjectStore("imgs",{keyPath:"id"})};
+        r.onsuccess=function(){res(r.result)}; r.onerror=function(){rej(r.error)};
+      }catch(e){rej(e)}
+    });
+    return dbp;
+  }
+  function tx(mode,fn){return db().then(function(d){return new Promise(function(res,rej){
+    var t=d.transaction("imgs",mode),st=t.objectStore("imgs"),out=fn(st);
+    t.oncomplete=function(){res(out&&out.result!==undefined?out.result:out)}; t.onerror=function(){rej(t.error)};
+  })})}
+  function listImgs(cat){return tx("readonly",function(st){return st.getAll()}).then(function(all){
+    return (all||[]).filter(function(x){return x.cat===cat}).sort(function(a,b){return a.t-b.t});
+  })}
+  function shrink(file){ // بيصغّر الصورة لـ 1600px علشان متاخدش مساحة
+    return new Promise(function(res){
+      var img=new Image(),u=URL.createObjectURL(file);
+      img.onload=function(){
+        var k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement("canvas");
+        c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+        c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(u);
+        c.toBlob(function(b){res(b||file)},"image/jpeg",.86);
+      };
+      img.onerror=function(){URL.revokeObjectURL(u);res(file)};
+      img.src=u;
+    });
+  }
+  function toPng(blob){
+    return new Promise(function(res,rej){
+      var img=new Image(),u=URL.createObjectURL(blob);
+      img.onload=function(){var c=document.createElement("canvas");c.width=img.width;c.height=img.height;
+        c.getContext("2d").drawImage(img,0,0);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej()},"image/png")};
+      img.onerror=function(){URL.revokeObjectURL(u);rej()}; img.src=u;
+    });
+  }
+  var thumbs=$("thumbs"),imgHint=$("imgHint"),shareRow=$("shareRow"),curImgs=[],urls=[];
+  var canShareFiles=!!(navigator.canShare&&window.File&&(function(){try{return navigator.canShare({files:[new File([""],"a.jpg",{type:"image/jpeg"})]})}catch(e){return false}})());
+  function showImages(){
+    var cat=cur;
+    listImgs(cat).then(function(list){
+      if(cat!==cur) return;
+      urls.forEach(function(u){URL.revokeObjectURL(u)}); urls=[]; curImgs=list; thumbs.textContent="";
+      list.forEach(function(it,i){
+        var u=URL.createObjectURL(it.blob); urls.push(u);
+        var box=document.createElement("div"); box.className="thumb";
+        var im=document.createElement("img"); im.src=u; im.alt="صورة شرح "+(i+1);
+        var bar=document.createElement("div");
+        var cp=document.createElement("button"); cp.type="button"; cp.textContent="انسخ";
+        cp.addEventListener("click",function(){
+          if(!(navigator.clipboard&&window.ClipboardItem)){cp.textContent="مش مدعوم";return}
+          navigator.clipboard.write([new ClipboardItem({"image/png":toPng(it.blob)})]).then(function(){
+            cp.textContent="اتنسخت ✓"; setTimeout(function(){cp.textContent="انسخ"},1600);
+          },function(){cp.textContent="مش مدعوم"});
+        });
+        var del=document.createElement("button"); del.type="button"; del.textContent="احذف";
+        del.addEventListener("click",function(){tx("readwrite",function(st){st.delete(it.id)}).then(showImages)});
+        bar.append(cp,del); box.append(im,bar); thumbs.append(box);
+      });
+      shareRow.hidden=!(canShareFiles&&list.length);
+    }).catch(function(){thumbs.textContent="";imgHint.textContent="الجهاز ده مش سامح بحفظ الصور في الأداة."});
+  }
+  $("gFiles").addEventListener("change",function(){
+    var files=[].slice.call(this.files||[]),cat=cur; this.value="";
+    Promise.all(files.map(function(f,i){return shrink(f).then(function(b){
+      return tx("readwrite",function(st){st.put({id:cat+"-"+Date.now()+"-"+i,cat:cat,t:Date.now()+i,name:f.name,blob:b})});
+    })})).then(showImages,function(){imgHint.textContent="ماقدرتش أحفظ الصور، يمكن مساحة الجهاز مليانة."});
+  });
+  $("shareImgs").addEventListener("click",function(){
+    var files=curImgs.map(function(it,i){return new File([it.blob],"شرح-"+(i+1)+".jpg",{type:it.blob.type||"image/jpeg"})});
+    navigator.share({files:files}).catch(function(){});
+  });
   useWeb.addEventListener("change",function(){save("wa_web",useWeb.checked?"1":"0");render()});
   send.addEventListener("click",function(ev){ if(send.getAttribute("aria-disabled")==="true") ev.preventDefault(); });
   $("tpl").addEventListener("click",function(){ msg.value=CATS[cur].msg; drop(msgKey(cur)); render(); });
