@@ -13,32 +13,47 @@
 <title>مرسال واتساب</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: عمودين على الشاشة الواسعة (الإدخال + شكل الرسالة عند العميل)، وعمود واحد على الموبايل */
+/* Layout: شريط أقسام فوق بلون كل قسم، وتحته عمودين (الإدخال + شكل الرسالة عند العميل)، وعمود واحد على الموبايل */
 :root{
-  --bg:#eef1ee; --surface:#fbfcfb; --ink:#17211c; --muted:#5c6a63; --line:#d3dad5;
-  --accent:#0f7a55; --accent-ink:#ffffff; --bubble:#dcf3e3; --warn:#a35a00; --link:#0b5cad;
+  --bg:#eef0f1; --surface:#fbfcfc; --ink:#16191c; --muted:#5d656c; --line:#d4d9dd;
+  --warn:#a35a00; --link:#0b5cad;
+  /* ألوان القسم المختار (بتتغير من data-cat) */
+  --c-band:#1b3a28; --c-band-ink:#ffffff; --c-accent:#1f7a4f; --c-accent-ink:#ffffff; --c-hi:#e8c97a;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#101613; --surface:#18201c; --ink:#e6ece8; --muted:#94a39b; --line:#2b3630;
-    --accent:#35b583; --accent-ink:#06261a; --bubble:#1d3a2c; --warn:#e5a550; --link:#7db8f5;
-    color-scheme:dark;
+    --bg:#111416; --surface:#1a1e21; --ink:#e7eaec; --muted:#98a1a8; --line:#2d3337;
+    --warn:#e5a550; --link:#7db8f5; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#101613; --surface:#18201c; --ink:#e6ece8; --muted:#94a39b; --line:#2b3630;
-  --accent:#35b583; --accent-ink:#06261a; --bubble:#1d3a2c; --warn:#e5a550; --link:#7db8f5;
-  color-scheme:dark;
+  --bg:#111416; --surface:#1a1e21; --ink:#e7eaec; --muted:#98a1a8; --line:#2d3337;
+  --warn:#e5a550; --link:#7db8f5; color-scheme:dark;
 }
+.wrap[data-cat="rest"]   {--c-band:#1b3a28;--c-band-ink:#ffffff;--c-accent:#1f7a4f;--c-accent-ink:#ffffff;--c-hi:#e8c97a}
+.wrap[data-cat="gym"]    {--c-band:#0b0b0b;--c-band-ink:#ffffff;--c-accent:#dc2626;--c-accent-ink:#ffffff;--c-hi:#facc15;--c-bubble:#facc15}
+.wrap[data-cat="payroll"]{--c-band:#0b1a3a;--c-band-ink:#ffffff;--c-accent:#1d4ed8;--c-accent-ink:#ffffff;--c-hi:#bfd3ff}
+.wrap[data-cat="erp"]    {--c-band:#1e1b4b;--c-band-ink:#ffffff;--c-accent:#6d28d9;--c-accent-ink:#ffffff;--c-hi:#c4b5fd}
+.wrap[data-cat="web"]    {--c-band:#0a0a0a;--c-band-ink:#ffffff;--c-accent:#f97316;--c-accent-ink:#0a0a0a;--c-hi:#facc15}
+.wrap[data-cat="custom"] {--c-band:#1f2933;--c-band-ink:#ffffff;--c-accent:#0f766e;--c-accent-ink:#ffffff;--c-hi:#5eead4}
+.wrap[data-cat="general"]{--c-band:#ffffff;--c-band-ink:#0a0a0a;--c-accent:#1747d6;--c-accent-ink:#ffffff;--c-hi:#1747d6}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7}
-.wrap{max-width:980px;margin-inline:auto;padding-inline:16px;padding-block:28px 40px;display:flex;flex-direction:column;gap:22px}
-header h1{margin:0;font-size:1.6rem;font-weight:700;line-height:1.3;text-wrap:balance}
+.wrap{max-width:1000px;margin-inline:auto;padding-inline:16px;padding-block:22px 40px;display:flex;flex-direction:column;gap:20px}
+.band{background:var(--c-band);color:var(--c-band-ink);border-radius:18px;padding:16px 18px 14px;display:flex;flex-direction:column;gap:12px;border:1.5px solid color-mix(in srgb,var(--c-band-ink) 14%,var(--c-band));transition:background .25s}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.install{font:inherit;font-weight:700;font-size:.95rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
-header p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.band h1{margin:0;font-size:1.5rem;font-weight:700;line-height:1.3}
+.band h1 small{display:block;font-size:.9rem;font-weight:600;color:var(--c-hi)}
+.stripe{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--c-accent),var(--c-hi))}
+.install{font:inherit;font-weight:700;font-size:.92rem;background:var(--c-accent);color:var(--c-accent-ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{font:inherit;font-size:.9rem;font-weight:700;display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  background:color-mix(in srgb,var(--c-band-ink) 8%,var(--c-band));color:var(--c-band-ink);
+  border:1.5px solid color-mix(in srgb,var(--c-band-ink) 22%,var(--c-band));border-radius:999px;padding:6px 14px}
+.tab i{width:10px;height:10px;border-radius:50%;background:var(--dot);flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--c-band-ink) 30%,transparent)}
+.tab[aria-pressed="true"]{background:var(--c-accent);color:var(--c-accent-ink);border-color:var(--c-accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px;align-items:start}
 .col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -46,59 +61,50 @@ label,.lbl{font-weight:600;font-size:.95rem}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row select{flex:0 1 150px;min-width:0}
 .row input{flex:1 1 170px;min-width:0}
-input,select,textarea{
-  font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);
-  border-radius:10px;padding:11px 12px;width:100%;
-}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
 #phone{font-family:var(--f-mono);font-size:1.05rem;letter-spacing:.02em;direction:ltr;text-align:left}
-textarea{min-height:190px;resize:vertical;line-height:1.8}
-input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.hint{font-size:.88rem;color:var(--muted);min-height:1.5em}
+textarea{min-height:220px;resize:vertical;line-height:1.8}
+input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--c-accent);outline-offset:2px}
+.hint{font-size:.86rem;color:var(--muted);min-height:1.4em}
 .hint.warn{color:var(--warn);font-weight:500}
 .hint b{font-family:var(--f-mono);font-weight:500;color:var(--ink);direction:ltr;unicode-bidi:isolate;font-size:1rem}
-.group{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px 16px;margin:0;min-width:0;display:flex;flex-direction:column;gap:12px}
-.group legend{font-weight:600;font-size:.95rem;padding-inline:6px}
-.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px}
-.duo label{font-weight:500;font-size:.85rem;color:var(--muted)}
-.ltr{font-family:var(--f-mono);direction:ltr;text-align:left}
-.check{display:flex;align-items:center;gap:8px;font-weight:500;font-size:.88rem;color:var(--muted);cursor:pointer}
-.check input{width:18px;height:18px;padding:0;accent-color:var(--accent);flex:none}
+.group{border:1.5px solid var(--line);border-top:4px solid var(--c-accent);border-radius:14px;padding:12px 14px 16px;margin:0;min-width:0;display:flex;flex-direction:column;gap:12px}
+.group legend{font-weight:700;font-size:.95rem;padding-inline:6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+.group label{font-weight:500;font-size:.85rem;color:var(--muted)}
+.ltr{font-family:var(--f-mono);direction:ltr;text-align:left;font-size:.92rem}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;font-size:.86rem;color:var(--muted);cursor:pointer}
+.check input{width:18px;height:18px;padding:0;accent-color:var(--c-accent);flex:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:inherit;font-size:.82rem;font-weight:600;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:3px 12px;cursor:pointer}
-.chip:hover{border-color:var(--accent)}
+.chip:hover{border-color:var(--c-accent)}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
-.send{
-  flex:1 1 200px;display:inline-flex;justify-content:center;align-items:center;gap:8px;
-  background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.05rem;
-  text-decoration:none;border-radius:12px;padding:13px 18px;border:0;
-}
+.send{flex:1 1 200px;display:inline-flex;justify-content:center;align-items:center;gap:8px;background:var(--c-accent);color:var(--c-accent-ink);font-weight:700;font-size:1.05rem;text-decoration:none;border-radius:12px;padding:13px 18px;border:0}
 .send[aria-disabled="true"]{background:var(--line);color:var(--muted);cursor:not-allowed}
 .ghost{font:inherit;font-weight:600;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;cursor:pointer}
 .ghost:hover{border-color:var(--muted)}
 .chat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.bubble{
-  background:var(--bubble);border-radius:14px 14px 14px 4px;padding:10px 14px;align-self:flex-start;
-  max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.98rem;min-height:2.6em
-}
+.bubble{background:color-mix(in srgb,var(--c-bubble,var(--c-accent)) 14%,var(--surface));border-radius:14px 14px 14px 4px;padding:10px 14px;align-self:flex-start;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.97rem;min-height:2.6em}
 .bubble a{color:var(--link);text-decoration:underline;direction:ltr;unicode-bidi:isolate}
 .bubble .empty{color:var(--muted)}
 .linkbox{display:flex;flex-direction:column;gap:6px;min-width:0}
-.linkbox code{
-  font-family:var(--f-mono);font-size:.8rem;direction:ltr;text-align:left;display:block;
-  background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;
-  overflow-wrap:anywhere;user-select:all;max-height:7.5em;overflow:auto;color:var(--muted)
-}
+.linkbox code{font-family:var(--f-mono);font-size:.8rem;direction:ltr;text-align:left;display:block;background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere;user-select:all;max-height:7.5em;overflow:auto;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.band{transition:none}}
 </style>
 
 <style>body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
-<div class="wrap" dir="rtl" lang="ar">
-  <header>
-    <div class="top"><h1>مرسال واتساب</h1><button class="install" id="install" type="button" hidden>⬇ ثبّت الأداة</button></div>
-    <div class="hint warn" id="iosHint" hidden>على الآيفون: افتح الصفحة في Safari، دوس زرار المشاركة، واختار «إضافة إلى الشاشة الرئيسية».</div>
-    <p>اكتب رقم العميل والرسالة، والأداة تظبط الكود الدولي والروابط وتفتح واتساب على الرسالة جاهزة.</p>
+<div class="wrap" dir="rtl" lang="ar" data-cat="rest" id="app">
+  <header class="band">
+    <div class="top">
+      <h1>مرسال واتساب<small id="catTitle">قسم المطاعم</small></h1>
+      <button class="install" id="install" type="button" hidden>⬇ ثبّت الأداة</button>
+    </div>
+    <div class="tabs" id="tabs" role="group" aria-label="القسم"></div>
+    <div class="stripe" aria-hidden="true"></div>
   </header>
+  <div class="hint warn" id="iosHint" hidden>على الآيفون: افتح الصفحة في Safari، دوس زرار المشاركة، واختار «إضافة إلى الشاشة الرئيسية».</div>
 
   <div class="grid">
     <div class="col">
@@ -112,28 +118,32 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
       </div>
 
       <fieldset class="group">
-        <legend>بيانات ديمو العميل</legend>
+        <legend id="clientLegend">بيانات العميل</legend>
         <div class="duo">
-          <div class="field"><label for="cRest">اسم المطعم</label><input id="cRest" type="text" dir="auto" autocomplete="off"></div>
-          <div class="field"><label for="cDays">المدة التجريبية (ساعات)</label><input id="cDays" type="number" min="1" max="999" inputmode="numeric"></div>
-          <div class="field"><label for="cUser">اسم المستخدم</label><input id="cUser" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
-          <div class="field"><label for="cPass">الباسورد</label><input id="cPass" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          <div class="field"><label for="cName" id="cNameLbl">اسم المطعم</label><input id="cName" type="text" dir="auto" autocomplete="off"></div>
+          <div class="field" data-f="prog"><label for="cProg">اسم البرنامج</label><input id="cProg" type="text" dir="auto" autocomplete="off"></div>
+          <div class="field" data-f="hours"><label for="cDays" id="cDaysLbl">المدة التجريبية (ساعات)</label><input id="cDays" type="number" min="1" max="9999" inputmode="numeric"></div>
+          <div class="field" data-f="user"><label for="cUser">اسم المستخدم</label><input id="cUser" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          <div class="field" data-f="pass"><label for="cPass">الباسورد</label><input id="cPass" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
         </div>
       </fieldset>
 
-      <div class="field">
-        <label for="bro">رابط البروشور</label>
-        <input id="bro" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://...">
-        <label class="check"><input type="checkbox" id="broKeep" checked> افتكر الرابط ده للمرات الجاية</label>
-        <div class="hint" id="broHint">بيانات العميل بتتضاف على الرابط ده لوحدها، والبروشور بيعرضها له.</div>
-      </div>
+      <fieldset class="group">
+        <legend>روابط القسم</legend>
+        <div class="field"><label for="lBro" id="lBroLbl">رابط البروشور</label><input id="lBro" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://..."></div>
+        <div class="field" data-f="demo"><label for="lDemo" id="lDemoLbl">رابط النسخة التجريبية (اختياري)</label><input id="lDemo" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://..."></div>
+        <div class="field"><label for="lFb">صفحة الفيسبوك (اختياري)</label><input id="lFb" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://facebook.com/..."></div>
+        <div class="field"><label for="lLi">LinkedIn (اختياري)</label><input id="lLi" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://linkedin.com/in/..."></div>
+        <label class="check"><input type="checkbox" id="linksKeep" checked> افتكر روابط القسم ده للمرات الجاية</label>
+        <div class="hint" id="linksHint"></div>
+      </fieldset>
 
       <div class="field">
         <label for="msg">الرسالة</label>
-        <div class="chips" id="chips"><button type="button" class="chip" id="tpl">رجّع الرسالة الجاهزة</button></div>
+        <div class="chips"><button type="button" class="chip" id="tpl">رجّع الرسالة الجاهزة</button></div>
         <textarea id="msg" dir="auto"></textarea>
         <div class="hint" id="msgHint" aria-live="polite"></div>
-        <div class="hint">الكلمات اللي بين { } بتتبدّل لوحدها باسم المطعم والمدة والرابط. سيبها زي ما هي.</div>
+        <div class="hint" id="phHint"></div>
       </div>
 
       <label class="check" id="useWebRow"><input type="checkbox" id="useWeb" checked> افتح في واتساب ويب (الإيموجي بتوصل سليمة)</label>
@@ -148,7 +158,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
       <div class="field">
         <span class="lbl">شكل الرسالة عند العميل</span>
         <div class="chat"><div class="bubble" id="preview" dir="auto"></div></div>
-        <div class="hint">اللي بالأزرق هيوصل للعميل رابط يتداس عليه.</div>
+        <div class="hint">اللي بالأزرق هيوصل للعميل رابط يتداس عليه. السطر اللي رابطه فاضي بيتشال لوحده.</div>
       </div>
       <div class="linkbox">
         <span class="lbl">رابط الإرسال</span>
@@ -185,7 +195,6 @@ function normalizePhone(raw,dial){
   }else{
     d=dial+d.replace(/^0+/,"");
   }
-  // صفر زيادة بعد كود الدولة (مثال: +20 010...)
   if(d.indexOf(dial+"0")===0) d=dial+d.slice(dial.length).replace(/^0+/,"");
   if(d.length<9||d.length>15) return {digits:d,status:"bad",note:"الرقم ناقص أو زيادة. راجعه."};
   if(d.indexOf("20")===0 && !/^201[0125]\d{8}$/.test(d))
@@ -194,7 +203,6 @@ function normalizePhone(raw,dial){
 }
 var URL_RE=/((?:https?:\/\/|www\.)[^\s<>]+|(?:[a-z0-9-]+\.)+(?:com|net|org|io|co|me|app|dev|shop|store|site|online|info|xyz|page|link|web|eg|sa|ae|ly|gl|ai|tv)(?:\/[^\s<>]*)?)/gi;
 var TRAIL=/[.,،؛:!?؟)\]»"']+$/;
-// بيرجع {text, parts:[{link:bool,v}], fixed:عدد الروابط اللي اتصلحت, count}
 function fixMessage(src){
   var parts=[],out="",last=0,fixed=0,count=0,m;
   function push(link,v){ if(!v) return; parts.push({link:link,v:v}); out+=v; }
@@ -202,7 +210,7 @@ function fixMessage(src){
   while((m=URL_RE.exec(src))){
     var raw=m[0],start=m.index,prev=start>0?src.charAt(start-1):"";
     var hasScheme=/^(https?:\/\/|www\.)/i.test(raw);
-    if(!hasScheme && /[@._\/\w-]/.test(prev)) continue; // إيميل أو جزء من كلمة
+    if(!hasScheme && /[@._\/\w-]/.test(prev)) continue;
     var tail=(raw.match(TRAIL)||[""])[0];
     var url=tail?raw.slice(0,raw.length-tail.length):raw;
     if(!url) continue;
@@ -224,7 +232,6 @@ function fixMessage(src){
   push(false,src.slice(last));
   return {text:out,parts:parts,fixed:fixed,count:count};
 }
-// بيحوّل تنسيق ماركداون (بتاع ChatGPT وغيره) لتنسيق واتساب
 function cleanMarkdown(src){
   return String(src||"")
     .replace(/\[([^\]\n]+)\]\(\s*((?:https?:\/\/|www\.)[^\s)]+)\s*\)/gi,function(_,label,url){
@@ -238,6 +245,11 @@ function cleanMarkdown(src){
 function stripTracking(u){
   return u.replace(/([?&])utm_source=chatgpt\.com&?/gi,"$1").replace(/[?&]$/,"");
 }
+function cleanUrl(u){
+  u=String(u||"").trim(); if(!u) return "";
+  if(!/^https?:\/\//i.test(u)) u="https://"+u;
+  return stripTracking(u);
+}
 function unitText(n,one,two,few,many){return n===1?one:n===2?two:n<=10?n+" "+few:n+" "+many}
 // المدة بتتكتب بالساعات، وبتنزل في الرسالة بالأيام لو أيام كاملة (24 = يوم واحد، 48 = يومين)
 function daysText(h){
@@ -245,11 +257,9 @@ function daysText(h){
   if(h%24===0) return unitText(h/24,"يوم واحد","يومين","أيام","يوم");
   return unitText(h,"ساعة واحدة","ساعتين","ساعات","ساعة");
 }
-// رابط البروشور + بيانات العميل (r المطعم، u المستخدم، p الباسورد، h الساعات)
+// رابط بروشور المطاعم + بيانات العميل (r المطعم، u المستخدم، p الباسورد، h الساعات)
 function buildClientLink(base,c){
-  base=String(base||"").trim(); if(!base) return "";
-  if(!/^https?:\/\//i.test(base)) base="https://"+base;
-  base=stripTracking(base);
+  base=cleanUrl(base); if(!base) return "";
   var qs=[];
   [["r",c.rest],["u",c.user],["p",c.pass],["h",parseInt(c.days,10)>0?String(parseInt(c.days,10)):""]].forEach(function(k){
     var v=String(k[1]||"").trim(); if(v) qs.push(k[0]+"="+encodeURIComponent(v));
@@ -258,17 +268,62 @@ function buildClientLink(base,c){
   var link=base+(base.indexOf("?")>=0?"&":"?")+qs.join("&");
   return link.replace(/[.!*'):]$/,function(ch){return "%"+ch.charCodeAt(0).toString(16).toUpperCase()});
 }
-var DEFAULT_MSG="السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n📱 للتواصل المباشر: 01508613866";
-// بيبدّل {المطعم} {المستخدم} {الباسورد} {المدة} {الرابط}؛ ولو {الرابط} مش مكتوب بيتحط في آخر الرسالة
-function fillTemplate(text,c,link){
-  var map={"المطعم":String(c.rest||"").trim()||"مطعمك","المستخدم":String(c.user||"").trim(),"الباسورد":String(c.pass||"").trim(),"المدة":daysText(c.days),"الرابط":link};
-  var missing=[],hasLink=text.indexOf("{الرابط}")>=0;
-  var out=text.replace(/\{(المطعم|المستخدم|الباسورد|المدة|الرابط)\}/g,function(m,k){
+
+var CONTACT="📱 للتواصل المباشر: 01508613866";
+var MY_LI="https://www.linkedin.com/in/mahmoud-gamal-eldeen-073967440/";
+var LINKS_BLOCK="💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT;
+var DEMO_BLOCK="📘 تفاصيل النظام: {البروشور}\n🎯 جرّب النسخة التجريبية بنفسك: {الديمو}\n👤 اسم المستخدم: {المستخدم}\n🔑 الباسورد: {الباسورد}\n⏳ مدة التجربة: {المدة}";
+
+// الأقسام: كل قسم له اسم وألوانه (في الـ CSS) وحقوله ورسالته
+var CATS={
+  rest:{label:"مطاعم",dot:"#1f7a4f",title:"قسم المطاعم",nameLbl:"اسم المطعم",nameFb:"مطعمك",
+    fields:["hours","user","pass"],broLbl:"رابط البروشور",bro:"https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/",li:"",
+    clientLink:true,required:["المدة"],msgKey:"wa_msg_v2",
+    msg:"السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT},
+  gym:{label:"جيم",dot:"#dc2626",title:"قسم الجيم",nameLbl:"اسم الجيم",nameFb:"الجيم بتاعك",
+    fields:["demo","hours","user","pass"],broLbl:"رابط بروشور الجيم (اختياري)",
+    msg:"السلام عليكم 👋\nكام مشترك في *{الاسم}* خلص اشتراكه ومجدّدش، أو عليه فلوس محدش فاكرها؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\nعملت نظام إدارة جيم بيمسك الحسابات كلها: اشتراكات بكل المدد، تجديد، عربون ومديونيات، ودخول المشترك بـ QR بيقف لوحده لو عليه فلوس متأخرة.\n\nوكل موظف بيدخل بحساب وكود خاص، فمحدش يقدر يلعب في الأرقام من وراك، والمشترك عنده تطبيق باسم الجيم ولوجو الجيم على موبايله.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
+  payroll:{label:"مرتبات",dot:"#1d4ed8",title:"قسم المرتبات والحضور",nameLbl:"اسم الشركة",nameFb:"شركتك",
+    fields:["demo","hours","user","pass"],broLbl:"رابط بروشور المرتبات (اختياري)",
+    msg:"السلام عليكم 👋\nلسه حساب المرتبات والحضور والانصراف في *{الاسم}* بياخد أيام آخر كل شهر؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\nعملت نظام مرتبات وموارد بشرية بيتربط بجهاز البصمة مباشرة، فالحضور والانصراف بيتسجلوا لوحدهم، والمرتب بيطلع جاهز بالخصومات والإضافات.\n\nبيانات الموظفين والمرتبات محفوظة أونلاين ومتزامنة على كل الأجهزة، والتقارير جاهزة في أي وقت.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
+  erp:{label:"ERP",dot:"#6d28d9",title:"قسم ERP (عملاء وموردين ومخازن)",nameLbl:"اسم الشركة",nameFb:"شركتك",
+    fields:["demo","hours","user","pass"],broLbl:"رابط بروشور الـ ERP (اختياري)",
+    msg:"السلام عليكم 👋\nتعرف دلوقتي بالظبط ليك كام عند العملاء، وعليك كام للموردين، وإيه اللي في مخازن *{الاسم}*؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\nعملت نظام ERP بيمسك حسابات الشركة في مكان واحد: العملاء والموردين وكشوف الحساب، فواتير البيع والشراء، المخازن والأصناف، والتقارير والأرباح.\n\nوكل مستخدم بصلاحياته، والبيانات متزامنة أونلاين على أي جهاز.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
+  web:{label:"ويب سايت",dot:"#f97316",title:"قسم المواقع",nameLbl:"اسم النشاط أو الشركة",nameFb:"نشاطك",
+    fields:["demo"],broLbl:"رابط أعمالك أو البروشور (اختياري)",demoLbl:"رابط نموذج موقع (اختياري)",
+    msg:"السلام عليكم 👋\nلما حد يدوّر على *{الاسم}* على النت، بيلاقي إيه؟\n\nأنا محمود من Urcod، مبرمج ومصمم مواقع.\nبعمل مواقع احترافية سريعة، شكلها مظبوط على الموبايل والكمبيوتر، بتعرض شغلك وخدماتك بهوية ولوجو نشاطك، وفيها زرار واتساب يوصّل العميل ليك على طول.\n\n📘 شوف أعمالي: {البروشور}\n🎯 نموذج موقع: {الديمو}\n\n"+LINKS_BLOCK},
+  custom:{label:"مخصص",dot:"#0f766e",title:"قسم مخصص",nameLbl:"اسم العميل",nameFb:"حضرتك",
+    fields:["prog","demo","hours","user","pass"],broLbl:"رابط البروشور (اختياري)",
+    msg:"السلام عليكم 👋\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\n\nحابب أعرّف *{الاسم}* على *{البرنامج}*، نظام عملته علشان يسهّل الشغل اليومي ويوفّر وقتك.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
+  general:{label:"تعريف بيا",dot:"#1747d6",title:"رسالة شاملة: تعريف بيا وبكل أعمالي",nameLbl:"اسم العميل (اختياري)",nameFb:"",
+    fields:[],broLbl:"رابط البروشور الشامل لأعمالي (اختياري)",
+    msg:"السلام عليكم 👋\nأهلاً أستاذ {الاسم}\n\nأنا محمود جمال الدين، مبرمج ومطوّر أنظمة إدارة تحت اسم *Urcod*.\nبعمل برامج بتمسك الشغل اليومي لأصحاب الأعمال وبتوفّر وقتهم:\n🍽️ أنظمة إدارة مطاعم وكافيهات\n🏋️ أنظمة إدارة جيم واشتراكات\n👥 مرتبات وحضور وانصراف بالبصمة\n📦 ERP للحسابات والعملاء والموردين والمخازن\n🌐 مواقع احترافية\n\nولو عندك فكرة برنامج مخصوص لشغلك، بنفّذهولك.\n\n📘 اتفرّج على كل أعمالي: {البروشور}\n\n"+LINKS_BLOCK}
+};
+var CAT_ORDER=["rest","gym","payroll","erp","web","custom","general"];
+
+// بيبدّل الكلمات اللي بين { }. السطر اللي فيه كلمة اختيارية فاضية بيتشال كله.
+// اسم العميل لو فاضي بيتكتب مكانه nameFb (ولو nameFb فاضي السطر بيتشال).
+function fillTemplate(text,vals,cat){
+  var map={
+    "الاسم":vals.name||cat.nameFb||"", "المطعم":vals.name||cat.nameFb||"",
+    "البرنامج":vals.prog||"برنامجنا",
+    "المستخدم":vals.user||"", "الباسورد":vals.pass||"", "المدة":daysText(vals.hours),
+    "البروشور":vals.bro||"", "الرابط":vals.bro||"", "الديمو":vals.demo||"",
+    "فيسبوك":vals.fb||"", "لينكدإن":vals.li||""
+  };
+  var required=cat.required||[], missing=[];
+  var TOK=/\{(الاسم|المطعم|البرنامج|المستخدم|الباسورد|المدة|البروشور|الرابط|الديمو|فيسبوك|لينكدإن)\}/g;
+  var lines=text.split("\n").filter(function(line){
+    var drop=false; line.replace(TOK,function(m,k){ if(!map[k] && required.indexOf(k)<0) drop=true; return m; });
+    return !drop;
+  });
+  var out=lines.join("\n").replace(TOK,function(m,k){
     if(map[k]) return map[k];
     if(missing.indexOf(k)<0) missing.push(k);
     return m;
   });
-  if(!hasLink && link) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+link;
+  if(cat.clientLink && text.indexOf("{الرابط}")<0 && text.indexOf("{البروشور}")<0 && vals.bro) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+vals.bro;
+  out=out.replace(/\n{3,}/g,"\n\n").replace(/^\s+|\s+$/g,"");
   return {text:out,missing:missing};
 }
 // web=true: واتساب ويب مباشرة (على الكمبيوتر برنامج واتساب بيبوّظ الإيموجي اللي جاية من الرابط)
@@ -281,87 +336,123 @@ function buildLink(digits,text,web){
 (function(){
   document.documentElement.lang="ar"; document.documentElement.dir="rtl";
   var $=function(id){return document.getElementById(id)};
-  var country=$("country"),phone=$("phone"),msg=$("msg"),send=$("send"),
-      phoneHint=$("phoneHint"),msgHint=$("msgHint"),preview=$("preview"),waLink=$("waLink");
-  COUNTRIES.forEach(function(c){
-    var o=document.createElement("option"); o.value=c[1]; o.textContent=c[0]+" +"+c[1]; country.appendChild(o);
-  });
   function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function drop(k){try{localStorage.removeItem(k)}catch(e){}}
+  var app=$("app"),country=$("country"),phone=$("phone"),msg=$("msg"),send=$("send"),
+      phoneHint=$("phoneHint"),msgHint=$("msgHint"),preview=$("preview"),waLink=$("waLink"),
+      cName=$("cName"),cProg=$("cProg"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),
+      lBro=$("lBro"),lDemo=$("lDemo"),lFb=$("lFb"),lLi=$("lLi"),linksKeep=$("linksKeep");
+  COUNTRIES.forEach(function(c){var o=document.createElement("option");o.value=c[1];o.textContent=c[0]+" +"+c[1];country.appendChild(o)});
   var sc=load("wa_country"); if(sc) country.value=sc;
-  var sm=load("wa_msg_v2"); msg.value=sm||DEFAULT_MSG;
-  var cRest=$("cRest"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),bro=$("bro"),broKeep=$("broKeep");
-  var DEFAULT_BRO="https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/";
-  broKeep.checked=load("wa_bro_keep")!=="0";
-  bro.value=(broKeep.checked&&load("wa_bro"))||DEFAULT_BRO;
-  function saveBro(){
-    save("wa_bro_keep",broKeep.checked?"1":"0");
-    if(broKeep.checked) save("wa_bro",bro.value.trim()); else{try{localStorage.removeItem("wa_bro")}catch(e){}}
+
+  // تخزين الروابط: كل قسم له روابطه (المطاعم بتحتفظ بالمفتاح القديم wa_bro)
+  function linkKey(cat,f){return cat==="rest"&&f==="bro"?"wa_bro":"wa_link_"+cat+"_"+f}
+  function msgKey(cat){return CATS[cat].msgKey||"wa_msg_"+cat}
+  linksKeep.checked=load("wa_bro_keep")!=="0";
+  var LINK_INPUTS={bro:lBro,demo:lDemo,fb:lFb,li:lLi};
+
+  var tabs=$("tabs"),cur=load("wa_cat"); if(!CATS[cur]) cur="rest";
+  CAT_ORDER.forEach(function(k){
+    var b=document.createElement("button"); b.type="button"; b.className="tab"; b.dataset.cat=k;
+    b.style.setProperty("--dot",CATS[k].dot);
+    var i=document.createElement("i"); b.append(i, CATS[k].label); tabs.append(b);
+  });
+
+  function setCat(k){
+    cur=k; var c=CATS[k]; save("wa_cat",k);
+    app.dataset.cat=k; $("catTitle").textContent=c.title;
+    tabs.querySelectorAll(".tab").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.cat===k?"true":"false")});
+    $("cNameLbl").textContent=c.nameLbl;
+    $("lBroLbl").textContent=c.broLbl;
+    $("lDemoLbl").textContent=c.demoLbl||"رابط النسخة التجريبية (اختياري)";
+    $("cDaysLbl").textContent=k==="rest"?"المدة التجريبية (ساعات)":"مدة التجربة بالساعات (اختياري)";
+    document.querySelectorAll("[data-f]").forEach(function(el){el.hidden=c.fields.indexOf(el.dataset.f)<0});
+    Object.keys(LINK_INPUTS).forEach(function(f){
+      var saved=linksKeep.checked?load(linkKey(k,f)):null;
+      var def=f==="bro"?(c.bro||""):f==="li"?(c.li!==undefined?c.li:MY_LI):"";
+      LINK_INPUTS[f].value=saved!==null?saved:def;
+    });
+    $("linksHint").textContent=c.clientLink?"بيانات العميل بتتضاف على رابط البروشور لوحدها، والبروشور بيعرضها له.":"كل الروابط اختيارية، واللي تسيبه فاضي سطره مش هيظهر في الرسالة.";
+    msg.value=load(msgKey(k))||c.msg;
+    $("phHint").textContent="الكلمات اللي بين { } بتتبدّل لوحدها ببيانات العميل والروابط. سيبها زي ما هي.";
+    render();
+  }
+  function saveLinks(){
+    save("wa_bro_keep",linksKeep.checked?"1":"0");
+    Object.keys(LINK_INPUTS).forEach(function(f){
+      if(linksKeep.checked) save(linkKey(cur,f),LINK_INPUTS[f].value.trim()); else drop(linkKey(cur,f));
+    });
   }
 
   var useWeb=$("useWeb"),isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   useWeb.checked=load("wa_web")!=="0";
   if(isMobile) $("useWebRow").hidden=true;
-  useWeb.addEventListener("change",function(){save("wa_web",useWeb.checked?"1":"0");render()});
-  function pretty(d){return "+"+d}
+
   function render(){
+    var c=CATS[cur];
     var p=normalizePhone(phone.value,country.value);
     var cleaned=cleanMarkdown(msg.value);
-    var c={rest:cRest.value,user:cUser.value,pass:cPass.value,days:cDays.value};
-    var t=fillTemplate(cleaned,c,buildClientLink(bro.value,c));
+    var has=function(f){return c.fields.indexOf(f)>=0};
+    var vals={
+      name:cName.value.trim(), prog:has("prog")?cProg.value.trim():"",
+      user:has("user")?cUser.value.trim():"", pass:has("pass")?cPass.value.trim():"", hours:has("hours")?cDays.value:"",
+      demo:has("demo")?cleanUrl(lDemo.value):"", fb:cleanUrl(lFb.value), li:cleanUrl(lLi.value)
+    };
+    vals.bro=c.clientLink?buildClientLink(lBro.value,{rest:vals.name,user:vals.user,pass:vals.pass,days:vals.hours}):cleanUrl(lBro.value);
+    var t=fillTemplate(cleaned,vals,c);
     var f=fixMessage(t.text);
+
     phoneHint.className="hint"+(p.status==="warn"||p.status==="bad"?" warn":"");
     phoneHint.textContent="";
     if(p.status==="empty"){ phoneHint.textContent="اكتبه زي ما هو عندك، بالصفر أو من غيره."; }
     else{
       phoneHint.append("هيتبعت على ");
-      var b=document.createElement("b"); b.textContent=pretty(p.digits); phoneHint.append(b);
+      var b=document.createElement("b"); b.textContent="+"+p.digits; phoneHint.append(b);
       if(p.note) phoneHint.append(" · "+p.note);
     }
-    msgHint.textContent=f.count? (f.count+" رابط في الرسالة"+(f.fixed?"، واتظبط منهم "+f.fixed+" (https والمسافات).":"، كلهم مظبوطين.")) : "";
+    msgHint.className="hint";
+    msgHint.textContent=f.count?(f.count+" رابط في الرسالة"+(f.fixed?"، واتظبط منهم "+f.fixed+".":"، كلهم مظبوطين.")):"";
     if(cleaned!==msg.value) msgHint.textContent+=" اتحوّل تنسيق [الاسم](الرابط) والنجوم لشكل واتساب.";
-    msgHint.className="hint"+(t.missing.length?" warn":"");
-    if(t.missing.length) msgHint.textContent="لسه ناقص في بيانات العميل فوق: "+t.missing.join("، ")+".";
-    else if(!cRest.value.trim()&&cleaned.indexOf("{المطعم}")>=0){msgHint.className="hint warn";msgHint.textContent="اسم المطعم فاضي، فهيتكتب «مطعمك» مكانه.";}
+    if(t.missing.length){ msgHint.className="hint warn"; msgHint.textContent="لسه ناقص في بيانات العميل فوق: "+t.missing.join("، ")+"."; }
+    else if(!vals.name && c.nameFb && /\{(الاسم|المطعم)\}/.test(cleaned)){ msgHint.className="hint warn"; msgHint.textContent="الاسم فاضي، فهيتكتب «"+c.nameFb+"» مكانه."; }
+
     preview.textContent="";
     if(!f.parts.length){
       var e=document.createElement("span"); e.className="empty"; e.textContent="الرسالة هتظهر هنا."; preview.append(e);
     }else f.parts.forEach(function(part){
-      if(part.link){
-        var a=document.createElement("a"); a.href=part.v; a.target="_blank"; a.rel="noopener"; a.textContent=part.v; preview.append(a);
-      }else part.v.split(/(\*[^*\n]+\*)/).forEach(function(t){
-        if(/^\*[^*\n]+\*$/.test(t)){ var b=document.createElement("b"); b.textContent=t.slice(1,-1); preview.append(b); }
-        else if(t) preview.append(t);
+      if(part.link){ var a=document.createElement("a"); a.href=part.v; a.target="_blank"; a.rel="noopener"; a.textContent=part.v; preview.append(a); }
+      else part.v.split(/(\*[^*\n]+\*)/).forEach(function(s){
+        if(/^\*[^*\n]+\*$/.test(s)){ var bb=document.createElement("b"); bb.textContent=s.slice(1,-1); preview.append(bb); }
+        else if(s) preview.append(s);
       });
     });
-    var ready=(p.status==="ok"||p.status==="warn");
-    if(ready){
+    if(p.status==="ok"||p.status==="warn"){
       var url=buildLink(p.digits,f.text,!isMobile&&useWeb.checked);
       send.href=url; send.setAttribute("aria-disabled","false"); waLink.textContent=url;
     }else{
       send.removeAttribute("href"); send.setAttribute("aria-disabled","true"); waLink.textContent="—";
     }
   }
+
+  tabs.addEventListener("click",function(ev){var b=ev.target.closest(".tab"); if(b&&b.dataset.cat!==cur) setCat(b.dataset.cat)});
   phone.addEventListener("input",render);
-  msg.addEventListener("input",function(){save("wa_msg_v2",msg.value);render()});
   country.addEventListener("change",function(){save("wa_country",country.value);render()});
+  msg.addEventListener("input",function(){save(msgKey(cur),msg.value);render()});
+  [cName,cProg,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
+  Object.keys(LINK_INPUTS).forEach(function(f){LINK_INPUTS[f].addEventListener("input",function(){saveLinks();render()})});
+  linksKeep.addEventListener("change",saveLinks);
+  useWeb.addEventListener("change",function(){save("wa_web",useWeb.checked?"1":"0");render()});
   send.addEventListener("click",function(ev){ if(send.getAttribute("aria-disabled")==="true") ev.preventDefault(); });
-  [cRest,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
-  bro.addEventListener("input",function(){saveBro();render()});
-  broKeep.addEventListener("change",saveBro);
-  $("chips").addEventListener("click",function(ev){
-    var b=ev.target.closest("button"); if(!b) return;
-    msg.value=DEFAULT_MSG;
-    save("wa_msg_v2",msg.value); render();
-  });
-  $("next").addEventListener("click",function(){phone.value=cRest.value=cUser.value=cPass.value="";render();phone.focus()});
+  $("tpl").addEventListener("click",function(){ msg.value=CATS[cur].msg; drop(msgKey(cur)); render(); });
+  $("next").addEventListener("click",function(){phone.value=cName.value=cUser.value=cPass.value="";render();phone.focus()});
   $("copy").addEventListener("click",function(){
     var btn=this,t=waLink.textContent; if(t==="—") return;
     function done(){btn.textContent="اتنسخ";setTimeout(function(){btn.textContent="انسخ الرابط"},1500)}
     function fallback(){var r=document.createRange();r.selectNodeContents(waLink);var s=getSelection();s.removeAllRanges();s.addRange(r)}
     try{navigator.clipboard.writeText(t).then(done,fallback)}catch(e){fallback()}
   });
-  render();
+  setCat(cur);
 
   // تثبيت الأداة كتطبيق (بيشتغل بس في النسخة المرفوعة على https ومعاها manifest)
   if(document.querySelector('link[rel="manifest"]')){
@@ -374,10 +465,8 @@ function buildLink(digits,text,web){
       if(isIOS) ib.hidden=false;
     }
     ib.addEventListener("click",function(){
-      if(deferred){
-        deferred.prompt();
-        deferred.userChoice.then(function(c){ if(c&&c.outcome==="accepted") ib.hidden=true; deferred=null; });
-      }else if(isIOS){ iosHint.hidden=!iosHint.hidden; }
+      if(deferred){ deferred.prompt(); deferred.userChoice.then(function(c){ if(c&&c.outcome==="accepted") ib.hidden=true; deferred=null; }); }
+      else if(isIOS){ iosHint.hidden=!iosHint.hidden; }
     });
     window.addEventListener("appinstalled",function(){ib.hidden=true;iosHint.hidden=true;deferred=null});
   }
