@@ -99,6 +99,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
 .filebtn:hover{border-color:var(--c-accent)}
 .filebtn input{position:absolute;width:1px;height:1px;opacity:0}
 textarea.small{min-height:96px}
+.chip[aria-pressed="true"]{background:var(--c-accent);color:var(--c-accent-ink);border-color:var(--c-accent)}
+.xlist,.mlist{display:flex;flex-direction:column;gap:8px}
+.xl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}
+.icon-btn{font:inherit;font-weight:700;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.icon-btn:hover{border-color:var(--warn);color:var(--warn)}
+button.filebtn{font:inherit;font-weight:600;font-size:.88rem;background:transparent}
+.mrow{display:grid;grid-template-columns:auto minmax(0,1.3fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;background:var(--c-accent);color:var(--c-accent-ink)}
+.pill{font-size:.78rem;font-weight:600;padding:2px 10px;border-radius:999px;border:1.5px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.done{border-color:var(--c-accent);color:var(--ink);background:color-mix(in srgb,var(--c-accent) 16%,var(--surface))}
+.pill.bad{border-color:var(--warn);color:var(--warn)}
+.mrow input.mp{font-family:var(--f-mono);direction:ltr;text-align:left}
+@media (max-width:520px){
+  .xl{grid-template-columns:minmax(0,1fr) auto}.xl .xu{grid-column:1}
+  .mrow{grid-template-columns:auto minmax(0,1fr) auto}.mrow .mn{grid-column:2}.mrow .pill{grid-row:1;grid-column:3}
+}
 @media (prefers-reduced-motion:reduce){.band{transition:none}}
 </style>
 
@@ -118,7 +134,23 @@ textarea.small{min-height:96px}
 
   <div class="grid">
     <div class="col">
-      <div class="field">
+      <label class="check" id="multiRow" hidden><input type="checkbox" id="multiOn"> ابعت لأكتر من رقم مرة واحدة (لحد 5، وكل رقم برسالة مختلفة)</label>
+
+      <fieldset class="group" id="multiBox" hidden>
+        <legend>الأرقام (لحد 5)</legend>
+        <div class="mlist" id="mRows"></div>
+        <div class="field"><label for="mGap">الوقت بين كل رسالة والتانية</label>
+          <select id="mGap"><option value="45">45 ثانية</option><option value="60">دقيقة</option><option value="90" selected>دقيقة ونص</option><option value="120">دقيقتين</option><option value="180">3 دقايق</option></select>
+        </div>
+        <div class="hint">الرقم 1 بيروح له «رسالة 1»، والرقم 2 «رسالة 2»، وهكذا. بعد كل رقم فيه عداد، ولما يخلص زرار الرقم اللي بعده بيتفتح. واتساب مش بيسمح بإرسال أوتوماتيك، فانت بتدوس إرسال في كل شات بنفسك.</div>
+        <div class="actions">
+          <a class="send" id="mNext" target="_blank" rel="noopener" aria-disabled="true">اكتب رقم واحد على الأقل</a>
+          <button class="ghost" id="mReset" type="button">ابدأ من جديد</button>
+        </div>
+        <div class="hint" id="mHint" aria-live="polite"></div>
+      </fieldset>
+
+      <div class="field" id="singlePhone">
         <label for="phone">رقم واتساب العميل</label>
         <div class="row">
           <select id="country" aria-label="الدولة"></select>
@@ -144,6 +176,12 @@ textarea.small{min-height:96px}
         <div class="field" data-f="demo"><label for="lDemo" id="lDemoLbl">رابط النسخة التجريبية (اختياري)</label><input id="lDemo" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://..."></div>
         <div class="field"><label for="lFb">صفحة الفيسبوك (اختياري)</label><input id="lFb" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://facebook.com/..."></div>
         <div class="field"><label for="lLi">LinkedIn (اختياري)</label><input id="lLi" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://linkedin.com/in/..."></div>
+        <div class="field"><label for="lBe">Behance (اختياري)</label><input id="lBe" class="ltr" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://behance.net/..."></div>
+        <div class="field">
+          <span class="lbl" style="font-weight:500;font-size:.85rem;color:var(--muted)">روابط تانية (اختياري)</span>
+          <div class="xlist" id="xlinks"></div>
+          <button type="button" class="filebtn" id="xAdd">＋ ضيف رابط</button>
+        </div>
         <label class="check"><input type="checkbox" id="linksKeep" checked> افتكر روابط القسم ده للمرات الجاية</label>
         <div class="hint" id="linksHint"></div>
       </fieldset>
@@ -163,6 +201,7 @@ textarea.small{min-height:96px}
 
       <div class="field">
         <label for="msg">الرسالة</label>
+        <div class="chips" id="vtabs" hidden></div>
         <div class="chips"><button type="button" class="chip" id="tpl">رجّع الرسالة الجاهزة</button></div>
         <textarea id="msg" dir="auto"></textarea>
         <div class="hint" id="msgHint" aria-live="polite"></div>
@@ -171,7 +210,7 @@ textarea.small{min-height:96px}
 
       <label class="check" id="useWebRow"><input type="checkbox" id="useWeb" checked> افتح في واتساب ويب (الإيموجي بتوصل سليمة)</label>
 
-      <div class="actions">
+      <div class="actions" id="singleActions">
         <a class="send" id="send" target="_blank" rel="noopener" aria-disabled="true">افتح واتساب وابعت</a>
         <button class="ghost" id="next" type="button">عميل جديد</button>
       </div>
@@ -294,7 +333,7 @@ function buildClientLink(base,c){
 
 var CONTACT="📱 للتواصل المباشر: 01508613866";
 var MY_LI="https://www.linkedin.com/in/mahmoud-gamal-eldeen-073967440/";
-var LINKS_BLOCK="{التشغيل}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT;
+var LINKS_BLOCK="{التشغيل}\n\n{روابط_أخرى}\n💼 أعمالي على LinkedIn: {لينكدإن}\n🎨 أعمالي على Behance: {بيهانس}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT;
 var DEMO_BLOCK="📘 تفاصيل النظام: {البروشور}\n🎯 جرّب النسخة التجريبية بنفسك: {الديمو}\n👤 اسم المستخدم: {المستخدم}\n🔑 الباسورد: {الباسورد}\n⏳ مدة التجربة: {المدة}";
 
 // الأقسام: كل قسم له اسم وألوانه (في الـ CSS) وحقوله ورسالته
@@ -302,7 +341,7 @@ var CATS={
   rest:{label:"مطاعم",dot:"#1f7a4f",title:"قسم المطاعم",nameLbl:"اسم المطعم",nameFb:"مطعمك",
     fields:["hours","user","pass"],broLbl:"رابط البروشور",bro:"https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/",li:"",
     clientLink:true,required:["المدة"],msgKey:"wa_msg_v2",
-    msg:"السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n{التشغيل}\n\n💼 أعمالي على LinkedIn: {لينكدإن}\n🔵 صفحتنا على فيسبوك: {فيسبوك}\n"+CONTACT},
+    msg:"السلام عليكم 👋\nكام عميل طلب من *{المطعم}* مرة واحدة ومارجعش تاني؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة مطاعم وكافيهات.\nعملت نظام إدارة مطاعم هدفه الأساسي إن العميل *يرجع يطلب منك تاني*: نقاط ولاء، هدايا أوتوماتيك، مسابقات وألعاب جوه تطبيق باسم مطعمك.\n\nوفي نفس الوقت بينظّم شغلك كله: منيو، طلبات، كاشير، واتساب، وتتبع الطلبات بالخريطة، من غير اشتراك شهري.\n\n🎁 *عرض الافتتاح: خصم 50% لأول 10 مطاعم بس.*\n\nجهّزت لحضرتك نسخة تجريبية تجربها بنفسك لمدة {المدة} 👇\n{الرابط}\n\n"+LINKS_BLOCK},
   gym:{label:"جيم",dot:"#dc2626",title:"قسم الجيم",nameLbl:"اسم الجيم",nameFb:"الجيم بتاعك",
     fields:["demo","hours","user","pass"],broLbl:"رابط بروشور الجيم (اختياري)",
     msg:"السلام عليكم 👋\nكام مشترك في *{الاسم}* خلص اشتراكه ومجدّدش، أو عليه فلوس محدش فاكرها؟\n\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\nعملت نظام إدارة جيم بيمسك الحسابات كلها: اشتراكات بكل المدد، تجديد، عربون ومديونيات، ودخول المشترك بـ QR بيقف لوحده لو عليه فلوس متأخرة.\n\nوكل موظف بيدخل بحساب وكود خاص، فمحدش يقدر يلعب في الأرقام من وراك، والمشترك عنده تطبيق باسم الجيم ولوجو الجيم على موبايله.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
@@ -319,9 +358,14 @@ var CATS={
     fields:["prog","demo","hours","user","pass"],broLbl:"رابط البروشور (اختياري)",
     msg:"السلام عليكم 👋\nأنا محمود من Urcod، مبرمج ومطوّر أنظمة إدارة.\n\nحابب أعرّف *{الاسم}* على *{البرنامج}*، نظام عملته علشان يسهّل الشغل اليومي ويوفّر وقتك.\n\n"+DEMO_BLOCK+"\n\n"+LINKS_BLOCK},
   general:{label:"تعريف بيا",dot:"#1747d6",title:"رسالة شاملة: تعريف بيا وبكل أعمالي",nameLbl:"اسم العميل (اختياري)",nameFb:"",
-    fields:[],broLbl:"رابط البروشور الشامل لأعمالي (اختياري)",
-    msg:"السلام عليكم 👋\nأهلاً أستاذ {الاسم}\n\nأنا محمود جمال الدين، مبرمج ومطوّر أنظمة إدارة تحت اسم *Urcod*.\nبعمل برامج بتمسك الشغل اليومي لأصحاب الأعمال وبتوفّر وقتهم:\n🍽️ أنظمة إدارة مطاعم وكافيهات\n🏋️ أنظمة إدارة جيم واشتراكات\n👥 مرتبات وحضور وانصراف بالبصمة\n📦 ERP للحسابات والعملاء والموردين والمخازن\n🌐 مواقع احترافية\n\nولو عندك فكرة برنامج مخصوص لشغلك، بنفّذهولك.\n\n📘 اتفرّج على كل أعمالي: {البروشور}\n\n"+LINKS_BLOCK}
+    fields:[],broLbl:"رابط البروشور الشامل لأعمالي (اختياري)",variants:true,
+    msgs:["السلام عليكم 👋\nأهلاً أستاذ {الاسم}\n\nأنا محمود جمال الدين، مبرمج ومطوّر أنظمة إدارة تحت اسم *Urcod*.\nبعمل برامج بتمسك الشغل اليومي لأصحاب الأعمال وبتوفّر وقتهم:\n🍽️ أنظمة إدارة مطاعم وكافيهات\n🏋️ أنظمة إدارة جيم واشتراكات\n👥 مرتبات وحضور وانصراف بالبصمة\n📦 ERP للحسابات والعملاء والموردين والمخازن\n🌐 مواقع احترافية\n\nولو عندك فكرة برنامج مخصوص لشغلك، بنفّذهولك.\n\n📘 اتفرّج على كل أعمالي: {البروشور}\n\n"+LINKS_BLOCK,
+      "أهلاً بحضرتك 👋\nأستاذ {الاسم}\n\nمعاك محمود جمال الدين من *Urcod*.\nشغلي إني أحوّل الشغل اليومي لأي نشاط لبرنامج سهل، صاحبه يتابعه من موبايله:\n• إدارة المطاعم والكافيهات\n• إدارة الجيم والاشتراكات\n• المرتبات والحضور بالبصمة\n• ERP للحسابات والمخازن\n• مواقع احترافية\n\nوبعمل كمان برامج مخصوصة على حسب احتياجك.\n\n📘 نماذج من شغلي: {البروشور}\n\n"+LINKS_BLOCK,
+      "السلام عليكم ورحمة الله 🌿\nأهلاً أستاذ {الاسم}\n\nأنا محمود، مطوّر برامج إدارة ومؤسس *Urcod*.\nلو بتتابع حسابات شغلك وطلباته وموظفينه بالورقة أو الإكسل، أقدر أعملك نظام يمسك ده كله في مكان واحد.\n\nبعمل أنظمة للمطاعم والكافيهات، والجيم، والشركات (مرتبات وحضور بالبصمة، وERP للعملاء والموردين والمخازن)، ومواقع احترافية.\n\n📘 شوف أعمالي: {البروشور}\n\n"+LINKS_BLOCK,
+      "أهلاً بحضرتك 👋\nأستاذ {الاسم}\n\nسؤال سريع: لو عندك برنامج يوفّر عليك وقت المتابعة والحسابات كل يوم، هتستغل الوقت ده في إيه؟ 😄\n\nأنا محمود من *Urcod*، وبعمل البرامج دي:\n🍽️ مطاعم وكافيهات\n🏋️ جيم واشتراكات\n👥 مرتبات وحضور وانصراف\n📦 ERP حسابات ومخازن\n🌐 مواقع احترافية\n\nوأي فكرة برنامج خاص بشغلك بنفّذها.\n\n📘 اتفرّج على شغلي: {البروشور}\n\n"+LINKS_BLOCK,
+      "السلام عليكم 👋\nأستاذ {الاسم}\n\nمعاك محمود جمال الدين، مبرمج أنظمة إدارة (*Urcod*).\nبعمل برامج للمطاعم، والجيم، والشركات (مرتبات وERP)، ومواقع احترافية، وبرامج مخصوصة حسب الطلب.\n\n📘 لو حابب تشوف أمثلة من شغلي: {البروشور}\n\nويسعدني أعرف طبيعة شغلك وأقولك أقدر أفيدك بإيه.\n\n"+LINKS_BLOCK]}
 };
+CATS.general.msg=CATS.general.msgs[0];
 var CAT_ORDER=["rest","gym","payroll","erp","web","custom","general"];
 
 // بيبدّل الكلمات اللي بين { }. السطر اللي فيه كلمة اختيارية فاضية بيتشال كله.
@@ -332,10 +376,10 @@ function fillTemplate(text,vals,cat){
     "البرنامج":vals.prog||"برنامجنا",
     "المستخدم":vals.user||"", "الباسورد":vals.pass||"", "المدة":daysText(vals.hours),
     "البروشور":vals.bro||"", "الرابط":vals.bro||"", "الديمو":vals.demo||"",
-    "فيسبوك":vals.fb||"", "لينكدإن":vals.li||"", "التشغيل":guideBlock(vals.gText,vals.gLink)
+    "فيسبوك":vals.fb||"", "لينكدإن":vals.li||"", "بيهانس":vals.be||"", "روابط_أخرى":extraBlock(vals.x), "التشغيل":guideBlock(vals.gText,vals.gLink)
   };
   var required=cat.required||[], missing=[];
-  var TOK=/\{(الاسم|المطعم|البرنامج|المستخدم|الباسورد|المدة|البروشور|الرابط|الديمو|فيسبوك|لينكدإن|التشغيل)\}/g;
+  var TOK=/\{(الاسم|المطعم|البرنامج|المستخدم|الباسورد|المدة|البروشور|الرابط|الديمو|فيسبوك|لينكدإن|بيهانس|روابط_أخرى|التشغيل)\}/g;
   var lines=text.split("\n").filter(function(line){
     var drop=false; line.replace(TOK,function(m,k){ if(!map[k] && required.indexOf(k)<0) drop=true; return m; });
     return !drop;
@@ -346,9 +390,23 @@ function fillTemplate(text,vals,cat){
     return m;
   });
   if(cat.clientLink && text.indexOf("{الرابط}")<0 && text.indexOf("{البروشور}")<0 && vals.bro) out=out.replace(/\s+$/,"")+(out.trim()?"\n\n":"")+vals.bro;
-  if(text.indexOf("{التشغيل}")<0 && map["التشغيل"]) out=out.replace(/\s+$/,"")+"\n\n"+map["التشغيل"];
+  // رسالة قديمة أو متعدلة مافيهاش المكان: بنحط الفقرة فوق سطور الروابط/رقمك
+  if(text.indexOf("{التشغيل}")<0 && map["التشغيل"]) out=insertBlock(out,map["التشغيل"],/^(💼|🎨|🔵|🔗|📱)/,true);
+  if(text.indexOf("{روابط_أخرى}")<0 && map["روابط_أخرى"]) out=insertBlock(out,map["روابط_أخرى"],/^📱/,false);
+  if(text.indexOf("{بيهانس}")<0 && map["بيهانس"]) out=insertBlock(out,"🎨 أعمالي على Behance: "+map["بيهانس"],/^📱/,false);
   out=out.replace(/\n{3,}/g,"\n\n").replace(/^\s+|\s+$/g,"");
   return {text:out,missing:missing};
+}
+function insertBlock(out,block,re,gap){
+  var lines=out.replace(/\s+$/,"").split("\n"),i=-1;
+  for(var k=0;k<lines.length;k++){ if(re.test(lines[k])){ i=k; break; } }
+  if(i<0) return lines.join("\n")+"\n\n"+block;
+  lines.splice.apply(lines,[i,0].concat(gap?[block,""]:[block]));
+  return lines.join("\n");
+}
+// الروابط الإضافية: «🔗 الاسم: الرابط» لكل رابط مكتوب
+function extraBlock(list){
+  return (list||[]).filter(function(x){return x&&x.u}).map(function(x){return "🔗 "+(x.n?x.n+": ":"")+x.u}).join("\n");
 }
 // فقرة شرح التثبيت: عنوان + الخطوات المكتوبة + رابط الشرح (اللي موجود منهم بس)
 function guideBlock(text,link){
@@ -375,16 +433,21 @@ function buildLink(digits,text,web){
   var app=$("app"),country=$("country"),phone=$("phone"),msg=$("msg"),send=$("send"),
       phoneHint=$("phoneHint"),msgHint=$("msgHint"),preview=$("preview"),waLink=$("waLink"),
       cName=$("cName"),cProg=$("cProg"),cUser=$("cUser"),cPass=$("cPass"),cDays=$("cDays"),
-      lBro=$("lBro"),lDemo=$("lDemo"),lFb=$("lFb"),lLi=$("lLi"),linksKeep=$("linksKeep"),
+      lBro=$("lBro"),lDemo=$("lDemo"),lFb=$("lFb"),lLi=$("lLi"),lBe=$("lBe"),linksKeep=$("linksKeep"),
       gLink=$("gLink"),gText=$("gText");
   COUNTRIES.forEach(function(c){var o=document.createElement("option");o.value=c[1];o.textContent=c[0]+" +"+c[1];country.appendChild(o)});
   var sc=load("wa_country"); if(sc) country.value=sc;
 
   // تخزين الروابط: كل قسم له روابطه (المطاعم بتحتفظ بالمفتاح القديم wa_bro)
   function linkKey(cat,f){return cat==="rest"&&f==="bro"?"wa_bro":"wa_link_"+cat+"_"+f}
-  function msgKey(cat){return CATS[cat].msgKey||"wa_msg_"+cat}
+  // قسم «تعريف بيا» فيه 5 رسايل، كل واحدة متخزنة لوحدها
+  var curVar=parseInt(load("wa_var"),10); if(!(curVar>=1&&curVar<=5)) curVar=1;
+  function vKey(n){return n===1?"wa_msg_general":"wa_msg_general_v"+n}
+  function vText(n){return load(vKey(n))||CATS.general.msgs[n-1]}
+  function msgKey(cat){return cat==="general"?vKey(curVar):(CATS[cat].msgKey||"wa_msg_"+cat)}
+  function defMsg(cat){return cat==="general"?CATS.general.msgs[curVar-1]:CATS[cat].msg}
   linksKeep.checked=load("wa_bro_keep")!=="0";
-  var LINK_INPUTS={bro:lBro,demo:lDemo,fb:lFb,li:lLi};
+  var LINK_INPUTS={bro:lBro,demo:lDemo,fb:lFb,li:lLi,be:lBe};
 
   var tabs=$("tabs"),cur=load("wa_cat"); if(!CATS[cur]) cur="rest";
   CAT_ORDER.forEach(function(k){
@@ -408,7 +471,10 @@ function buildLink(digits,text,web){
       LINK_INPUTS[f].value=saved!==null?saved:def;
     });
     $("linksHint").textContent=c.clientLink?"بيانات العميل بتتضاف على رابط البروشور لوحدها، والبروشور بيعرضها له.":"كل الروابط اختيارية، واللي تسيبه فاضي سطره مش هيظهر في الرسالة.";
-    msg.value=load(msgKey(k))||c.msg;
+    msg.value=load(msgKey(k))||defMsg(k);
+    $("vtabs").hidden=!c.variants; markVar();
+    $("multiRow").hidden=!c.variants; applyMulti();
+    loadX();
     gLink.value=load("wa_glink_"+k)||""; gText.value=load("wa_gtext_"+k)||"";
     showImages();
     $("phHint").textContent="الكلمات اللي بين { } بتتبدّل لوحدها ببيانات العميل والروابط. سيبها زي ما هي.";
@@ -425,20 +491,28 @@ function buildLink(digits,text,web){
   useWeb.checked=load("wa_web")!=="0";
   if(isMobile) $("useWebRow").hidden=true;
 
-  function render(){
+  // بيركّب رسالة القسم الحالي من نص معيّن واسم معيّن
+  function compose(text,name){
     var c=CATS[cur];
-    var p=normalizePhone(phone.value,country.value);
-    var cleaned=cleanMarkdown(msg.value);
+    var cleaned=cleanMarkdown(text);
     var has=function(f){return c.fields.indexOf(f)>=0};
     var vals={
-      name:cName.value.trim(), prog:has("prog")?cProg.value.trim():"",
+      name:String(name||"").trim(), prog:has("prog")?cProg.value.trim():"",
       user:has("user")?cUser.value.trim():"", pass:has("pass")?cPass.value.trim():"", hours:has("hours")?cDays.value:"",
       demo:has("demo")?cleanUrl(lDemo.value):"", fb:cleanUrl(lFb.value), li:cleanUrl(lLi.value),
-      gLink:cleanUrl(gLink.value), gText:gText.value
+      gLink:cleanUrl(gLink.value), gText:gText.value, be:cleanUrl(lBe.value),
+      x:xlinks.map(function(x){return {n:String(x.n||"").trim(),u:cleanUrl(x.u)}})
     };
     vals.bro=c.clientLink?buildClientLink(lBro.value,{rest:vals.name,user:vals.user,pass:vals.pass,days:vals.hours}):cleanUrl(lBro.value);
     var t=fillTemplate(cleaned,vals,c);
-    var f=fixMessage(t.text);
+    return {c:c,cleaned:cleaned,vals:vals,t:t,f:fixMessage(t.text)};
+  }
+  function render(){
+    var multi=isMulti();
+    var mi=multi?nextIdx():-1;
+    var r=compose(msg.value,multi?(mi>=0?mNames[mi]:""):cName.value);
+    var c=r.c,cleaned=r.cleaned,vals=r.vals,t=r.t,f=r.f;
+    var p=normalizePhone(phone.value,country.value);
 
     phoneHint.className="hint"+(p.status==="warn"||p.status==="bad"?" warn":"");
     phoneHint.textContent="";
@@ -452,7 +526,7 @@ function buildLink(digits,text,web){
     msgHint.textContent=f.count?(f.count+" رابط في الرسالة"+(f.fixed?"، واتظبط منهم "+f.fixed+".":"، كلهم مظبوطين.")):"";
     if(cleaned!==msg.value) msgHint.textContent+=" اتحوّل تنسيق [الاسم](الرابط) والنجوم لشكل واتساب.";
     if(t.missing.length){ msgHint.className="hint warn"; msgHint.textContent="لسه ناقص في بيانات العميل فوق: "+t.missing.join("، ")+"."; }
-    else if(!vals.name && c.nameFb && /\{(الاسم|المطعم)\}/.test(cleaned)){ msgHint.className="hint warn"; msgHint.textContent="الاسم فاضي، فهيتكتب «"+c.nameFb+"» مكانه."; }
+    else if(!multi && !vals.name && c.nameFb && /\{(الاسم|المطعم)\}/.test(cleaned)){ msgHint.className="hint warn"; msgHint.textContent="الاسم فاضي، فهيتكتب «"+c.nameFb+"» مكانه."; }
 
     preview.textContent="";
     if(!f.parts.length){
@@ -464,6 +538,7 @@ function buildLink(digits,text,web){
         else if(s) preview.append(s);
       });
     });
+    if(multi){ renderMulti(); return; }
     if(p.status==="ok"||p.status==="warn"){
       var url=buildLink(p.digits,f.text,!isMobile&&useWeb.checked);
       send.href=url; send.setAttribute("aria-disabled","false"); waLink.textContent=url;
@@ -478,7 +553,107 @@ function buildLink(digits,text,web){
   msg.addEventListener("input",function(){save(msgKey(cur),msg.value);render()});
   [cName,cProg,cUser,cPass,cDays].forEach(function(el){el.addEventListener("input",render)});
   Object.keys(LINK_INPUTS).forEach(function(f){LINK_INPUTS[f].addEventListener("input",function(){saveLinks();render()})});
-  linksKeep.addEventListener("change",saveLinks);
+  linksKeep.addEventListener("change",function(){saveLinks();saveX()});
+
+  // ===== روابط تانية (اسم + رابط) لكل قسم =====
+  var xlinks=[],xbox=$("xlinks");
+  function loadX(){
+    xlinks=[]; try{xlinks=JSON.parse(load("wa_xlinks_"+cur)||"[]")||[]}catch(e){xlinks=[]}
+    drawX();
+  }
+  function saveX(){ if(linksKeep.checked) save("wa_xlinks_"+cur,JSON.stringify(xlinks)); else drop("wa_xlinks_"+cur); }
+  function drawX(){
+    xbox.textContent="";
+    xlinks.forEach(function(x,i){
+      var row=document.createElement("div"); row.className="xl";
+      var n=document.createElement("input"); n.type="text"; n.dir="auto"; n.placeholder="اسم الرابط (مثلاً: إنستجرام)"; n.value=x.n||""; n.setAttribute("aria-label","اسم الرابط "+(i+1)); n.id="xn"+i;
+      var u=document.createElement("input"); u.type="url"; u.className="ltr xu"; u.placeholder="https://..."; u.value=x.u||""; u.setAttribute("aria-label","الرابط "+(i+1)); u.id="xu"+i;
+      var d=document.createElement("button"); d.type="button"; d.className="icon-btn"; d.textContent="×"; d.title="امسح الرابط"; d.setAttribute("aria-label","امسح الرابط "+(i+1));
+      n.addEventListener("input",function(){x.n=n.value;saveX();render()});
+      u.addEventListener("input",function(){x.u=u.value;saveX();render()});
+      d.addEventListener("click",function(){xlinks.splice(i,1);saveX();drawX();render()});
+      row.append(n,u,d); xbox.append(row);
+    });
+  }
+  $("xAdd").addEventListener("click",function(){xlinks.push({n:"",u:""});saveX();drawX();var el=$("xn"+(xlinks.length-1));if(el)el.focus();});
+
+  // ===== رسايل «تعريف بيا» الخمسة =====
+  var vtabs=$("vtabs");
+  for(var vi=1;vi<=5;vi++){ (function(n){
+    var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent="رسالة "+n; b.dataset.v=n;
+    b.addEventListener("click",function(){setVar(n)}); vtabs.append(b);
+  })(vi); }
+  function markVar(){ vtabs.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",+b.dataset.v===curVar?"true":"false")}); }
+  function setVar(n){ curVar=n; save("wa_var",String(n)); msg.value=vText(n); markVar(); render(); }
+
+  // ===== إرسال لأكتر من رقم (قسم تعريف بيا بس) =====
+  var multiOn=$("multiOn"),mRows=$("mRows"),mNext=$("mNext"),mHint=$("mHint"),mGap=$("mGap");
+  var mPhones=["","","","",""],mNames=["","","","",""],mDone=[0,0,0,0,0],waitUntil=0,tick=null;
+  try{var ms=JSON.parse(load("wa_multi")||"null"); if(ms){mPhones=ms.p||mPhones;mNames=ms.n||mNames;mDone=ms.d||mDone;waitUntil=ms.w||0;}}catch(e){}
+  multiOn.checked=load("wa_multi_on")==="1";
+  var g0=load("wa_gap"); if(g0) mGap.value=g0;
+  function saveM(){ save("wa_multi",JSON.stringify({p:mPhones,n:mNames,d:mDone,w:waitUntil})); }
+  var mPills=[];
+  for(var mi=0;mi<5;mi++){ (function(i){
+    var row=document.createElement("div"); row.className="mrow";
+    var num=document.createElement("span"); num.className="num"; num.textContent=i+1;
+    var ph=document.createElement("input"); ph.type="tel"; ph.inputMode="tel"; ph.className="mp"; ph.id="mp"+i; ph.placeholder="رقم "+(i+1); ph.value=mPhones[i]; ph.setAttribute("aria-label","رقم "+(i+1));
+    var nm=document.createElement("input"); nm.type="text"; nm.dir="auto"; nm.className="mn"; nm.id="mn"+i; nm.placeholder="الاسم (اختياري)"; nm.value=mNames[i]; nm.setAttribute("aria-label","اسم صاحب الرقم "+(i+1));
+    var pill=document.createElement("span"); pill.className="pill"; mPills.push(pill);
+    ph.addEventListener("input",function(){mPhones[i]=ph.value;mDone[i]=0;saveM();render()});
+    nm.addEventListener("input",function(){mNames[i]=nm.value;saveM();render()});
+    row.append(num,ph,nm,pill); mRows.append(row);
+  })(mi); }
+  function isMulti(){ return !!(CATS[cur].variants && multiOn.checked); }
+  function mPhone(i){ return normalizePhone(mPhones[i],country.value); }
+  function mValid(i){ var s=mPhone(i).status; return s==="ok"||s==="warn"; }
+  function nextIdx(){ for(var i=0;i<5;i++){ if(mValid(i)&&!mDone[i]) return i; } return -1; }
+  function applyMulti(){
+    var on=isMulti();
+    $("multiBox").hidden=!on; $("singlePhone").hidden=on; $("singleActions").hidden=on; $("clientLegend").parentElement.hidden=on;
+    if(on){ var n=nextIdx(); if(n>=0&&curVar!==n+1){ curVar=n+1; save("wa_var",String(curVar)); msg.value=vText(curVar); markVar(); } }
+  }
+  function fmt(sec){ var m=Math.floor(sec/60),r=sec%60; return m+":"+(r<10?"0":"")+r; }
+  function renderMulti(){
+    var any=false;
+    for(var i=0;i<5;i++){
+      var pl=mPills[i],st=mPhone(i).status; pl.className="pill";
+      if(st==="empty"){ pl.textContent="—"; }
+      else if(st==="bad"){ pl.textContent="رقم غلط"; pl.className="pill bad"; }
+      else if(mDone[i]){ pl.textContent="اتفتح ✓"; pl.className="pill done"; any=true; }
+      else { pl.textContent="رسالة "+(i+1); any=true; }
+    }
+    var n=nextIdx(),left=Math.ceil((waitUntil-Date.now())/1000);
+    clearTimeout(tick);
+    if(!any){ off("اكتب رقم واحد على الأقل"); mHint.textContent=""; return; }
+    if(n<0){ off("خلصت كل الأرقام ✓"); mHint.textContent="لو عاوز تبعت لمجموعة تانية دوس «ابدأ من جديد»."; return; }
+    if(left>0){
+      off("الرقم "+(n+1)+" بعد "+fmt(left));
+      mHint.textContent="استنى العداد يخلص قبل الرقم اللي بعده، ده بيقلل احتمال إن واتساب يعتبرها رسايل مزعجة.";
+      tick=setTimeout(function(){ if(Date.now()>=waitUntil) applyMulti(); render(); },1000);
+      return;
+    }
+    var r=compose(vText(n+1),mNames[n]),url=buildLink(mPhone(n).digits,r.f.text,!isMobile&&useWeb.checked);
+    mNext.href=url; mNext.setAttribute("aria-disabled","false"); mNext.textContent="افتح الرقم "+(n+1)+" برسالة "+(n+1);
+    waLink.textContent=url;
+    mHint.textContent="بعد ما واتساب يفتح، دوس إرسال هناك وارجع هنا.";
+  }
+  function off(label){ mNext.removeAttribute("href"); mNext.setAttribute("aria-disabled","true"); mNext.textContent=label; waLink.textContent="—"; }
+  mNext.addEventListener("click",function(ev){
+    if(mNext.getAttribute("aria-disabled")==="true"){ ev.preventDefault(); return; }
+    var n=nextIdx(); if(n<0) return;
+    mDone[n]=1;
+    var gap=parseInt(mGap.value,10)||90;
+    waitUntil=nextIdx()>=0?Date.now()+(gap+Math.floor(Math.random()*21))*1000:0; // + لحد 20 ثانية عشوائي
+    saveM(); setTimeout(function(){applyMulti();render()},0);
+  });
+  $("mReset").addEventListener("click",function(){
+    mPhones=["","","","",""]; mNames=["","","","",""]; mDone=[0,0,0,0,0]; waitUntil=0; saveM();
+    for(var i=0;i<5;i++){ $("mp"+i).value=""; $("mn"+i).value=""; }
+    applyMulti(); render();
+  });
+  multiOn.addEventListener("change",function(){ save("wa_multi_on",multiOn.checked?"1":"0"); applyMulti(); render(); });
+  mGap.addEventListener("change",function(){ save("wa_gap",mGap.value); });
   gLink.addEventListener("input",function(){save("wa_glink_"+cur,gLink.value.trim());render()});
   gText.addEventListener("input",function(){save("wa_gtext_"+cur,gText.value);render()});
 
@@ -560,7 +735,7 @@ function buildLink(digits,text,web){
   });
   useWeb.addEventListener("change",function(){save("wa_web",useWeb.checked?"1":"0");render()});
   send.addEventListener("click",function(ev){ if(send.getAttribute("aria-disabled")==="true") ev.preventDefault(); });
-  $("tpl").addEventListener("click",function(){ msg.value=CATS[cur].msg; drop(msgKey(cur)); render(); });
+  $("tpl").addEventListener("click",function(){ msg.value=defMsg(cur); drop(msgKey(cur)); render(); });
   $("next").addEventListener("click",function(){phone.value=cName.value=cUser.value=cPass.value="";render();phone.focus()});
   $("copy").addEventListener("click",function(){
     var btn=this,t=waLink.textContent; if(t==="—") return;
