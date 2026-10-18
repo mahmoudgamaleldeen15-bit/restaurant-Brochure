@@ -99,6 +99,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
 .filebtn:hover{border-color:var(--c-accent)}
 .filebtn input{position:absolute;width:1px;height:1px;opacity:0}
 textarea.small{min-height:96px}
+.ogimg{display:block;width:100%;max-width:100%;aspect-ratio:1200/630;object-fit:cover;border-radius:10px;border:1.5px solid var(--line);background:var(--bg)}
+#ogCode{font-family:var(--f-mono);font-size:.75rem;direction:ltr;text-align:left;min-height:150px}
 .chip[aria-pressed="true"]{background:var(--c-accent);color:var(--c-accent-ink);border-color:var(--c-accent)}
 .xlist,.mlist{display:flex;flex-direction:column;gap:8px}
 .xl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}
@@ -184,6 +186,14 @@ button.filebtn{font:inherit;font-weight:600;font-size:.88rem;background:transpar
         </div>
         <label class="check"><input type="checkbox" id="linksKeep" checked> افتكر روابط القسم ده للمرات الجاية</label>
         <div class="hint" id="linksHint"></div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>صورة المعاينة في واتساب</legend>
+        <img id="ogImg" class="ogimg" alt="صورة معاينة القسم">
+        <div class="hint" id="ogHint"></div>
+        <div class="actions" id="ogActs"><button class="ghost" id="ogCopy" type="button">انسخ كود الصورة لبروشور القسم</button></div>
+        <textarea id="ogCode" readonly hidden aria-label="كود صورة المعاينة"></textarea>
       </fieldset>
 
       <fieldset class="group">
@@ -422,6 +432,24 @@ function buildLink(digits,text,web){
   if(web) return "https://web.whatsapp.com/send?phone="+digits+(text?"&text="+encodeURIComponent(text):"");
   return "https://wa.me/"+digits+(text?"?text="+encodeURIComponent(text):"");
 }
+// صور المعاينة: متخزنة في mersal/cards، والكود ده بيتحط في <head> بتاع بروشور كل قسم
+var CARD_BASE="https://mahmoudgamaleldeen15-bit.github.io/restaurant-Brochure/mersal/cards/";
+var OG={
+  rest:{img:"rest",done:true},
+  gym:{img:"gym",title:"نظام إدارة الجيم | Urcod",desc:"اشتراكات وتجديد، دخول المشتركين بـ QR، عربون ومديونيات، وحسابات موظفين محمية. جرّبه مجاناً."},
+  payroll:{img:"payroll",title:"نظام المرتبات والحضور | Urcod",desc:"حضور وانصراف بجهاز البصمة، ومرتبات جاهزة بالخصومات والإضافات، وتقارير في أي وقت."},
+  erp:{img:"erp",title:"نظام ERP لإدارة الشركات | Urcod",desc:"العملاء والموردين وكشوف الحساب، فواتير البيع والشراء، المخازن والأصناف، والتقارير والأرباح."},
+  web:{img:"web",title:"مواقع احترافية | Urcod",desc:"مواقع سريعة بهوية نشاطك، مظبوطة على الموبايل والكمبيوتر، وفيها زرار واتساب مباشر."},
+  custom:{img:"general",title:"Urcod | برامج إدارة لكل نشاط",desc:"أنظمة مطاعم وجيم ومرتبات وERP ومواقع احترافية، وبرامج مخصوصة حسب شغلك."},
+  general:{img:"general",title:"Urcod | برامج إدارة لكل نشاط",desc:"أنظمة مطاعم وجيم ومرتبات وERP ومواقع احترافية، وبرامج مخصوصة حسب شغلك."}
+};
+function ogSnippet(k){
+  var o=OG[k],img=CARD_BASE+o.img+".jpg";
+  return ['<meta property="og:type" content="website">','<meta property="og:site_name" content="Urcod">',
+    '<meta property="og:title" content="'+o.title+'">','<meta property="og:description" content="'+o.desc+'">',
+    '<meta property="og:image" content="'+img+'">','<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">','<meta name="twitter:card" content="summary_large_image">'].join("\n");
+}
 /*PURE-END*/
 
 (function(){
@@ -474,7 +502,7 @@ function buildLink(digits,text,web){
     msg.value=load(msgKey(k))||defMsg(k);
     $("vtabs").hidden=!c.variants; markVar();
     $("multiRow").hidden=!c.variants; applyMulti();
-    loadX();
+    loadX(); showOg(k);
     gLink.value=load("wa_glink_"+k)||""; gText.value=load("wa_gtext_"+k)||"";
     showImages();
     $("phHint").textContent="الكلمات اللي بين { } بتتبدّل لوحدها ببيانات العميل والروابط. سيبها زي ما هي.";
@@ -576,6 +604,20 @@ function buildLink(digits,text,web){
     });
   }
   $("xAdd").addEventListener("click",function(){xlinks.push({n:"",u:""});saveX();drawX();var el=$("xn"+(xlinks.length-1));if(el)el.focus();});
+
+  // ===== صورة المعاينة =====
+  function showOg(k){
+    var o=OG[k]; $("ogImg").src="cards/"+o.img+".jpg"; $("ogCode").hidden=true;
+    $("ogActs").hidden=!!o.done;
+    $("ogHint").textContent=o.done
+      ?"الصورة دي متركبة بالفعل في بروشور المطاعم، وبتظهر لوحدها مع الرابط."
+      :"الصورة بتظهر في واتساب مع أول رابط في الرسالة، بشرط إن صفحته فيها كود الصورة. دوس الزرار، وافتح index.html بتاع بروشور القسم وحط الكود جوه <head>، وارفعه.";
+  }
+  $("ogCopy").addEventListener("click",function(){
+    var b=this,code=ogSnippet(cur),box=$("ogCode");
+    function shown(){ box.value=code; box.hidden=false; box.focus(); box.select(); }
+    try{ navigator.clipboard.writeText(code).then(function(){ b.textContent="اتنسخ ✓"; setTimeout(function(){b.textContent="انسخ كود الصورة لبروشور القسم"},1600); },shown); }catch(e){ shown(); }
+  });
 
   // ===== رسايل «تعريف بيا» الخمسة =====
   var vtabs=$("vtabs");
